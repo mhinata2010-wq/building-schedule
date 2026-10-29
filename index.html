@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Building Schedule｜現場工程表</title><link rel="stylesheet" href="style.css?v=20261029-codebase">
+<title>Building Schedule｜現場工程表</title><link rel="stylesheet" href="style.css?v=20261029-codebase"><link rel="stylesheet" href="gantt-scroll-fix.css?v=20261029-scroll">
 </head>
 <body>
 <div class="app-shell">
@@ -14,7 +14,7 @@
     <button class="side-link active" data-view="gantt"><span class="nav-icon">▦</span><span>工程表</span></button>
     <button class="side-link" data-view="network"><span class="nav-icon">⌘</span><span>ネットワーク工程表</span></button>
   </nav>
-  <div class="sidebar-note"><span>操作</span><p>日付の上を横にドラッグして工程バーを追加できます。</p></div>
+  <div class="sidebar-note"><span>操作</span><p>工程表は左右にスクロールできます。空いている行を横にドラッグすると工程を追加できます。</p></div>
 </aside>
 <div class="workspace">
 <header class="topbar">
@@ -29,7 +29,7 @@
   </div>
   <section id="gantt" class="view-section">
     <div class="block">
-      <div class="block-head"><div><strong>工程タイムライン</strong><small>空いている行を横方向にドラッグして工程を追加</small></div><span class="badge">工程表</span></div>
+      <div class="block-head"><div><strong>工程タイムライン</strong><small>左右スクロール対応・空いている行を横方向にドラッグして工程を追加</small></div><span class="badge">90日表示</span></div>
       <div class="schedule-scroll"><div class="schedule-min"><div class="dates" id="dates"></div><div id="rows"></div></div></div>
     </div>
   </section>
@@ -43,5 +43,5 @@
 </div>
 </div>
 <dialog id="editor"><form id="editorForm"><div class="dialog-head"><div><span>工程情報</span><h2 id="editorTitle">工程を編集</h2></div><button id="dialogClose" type="button" aria-label="閉じる">×</button></div><label>工程名<input id="name" placeholder="例：基礎工事" required></label><div class="two"><label>開始日<input id="start" type="date" required></label><label>終了日<input id="end" type="date" required></label></div><label>前工程<select id="predecessor"><option value="">なし</option></select></label><p class="hint">前工程を設定すると、ネットワーク工程表にも同じ前後関係が反映されます。</p><div class="actions"><button id="cancel" type="button">キャンセル</button><button id="save" type="submit">保存する</button></div></form></dialog>
-<script src="app.js?v=20261029-codebase"></script><script>document.getElementById('dialogClose').addEventListener('click',()=>document.getElementById('cancel').click());</script>
+<script src="app.js?v=20261029-scroll"></script><script>document.getElementById('dialogClose').addEventListener('click',()=>document.getElementById('cancel').click());</script>
 </body></html>
