@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Building Schedule｜現場工程表</title><link rel="stylesheet" href="style.css">
+<title>Building Schedule｜現場工程表</title><link rel="stylesheet" href="style.css?v=20261029-2">
 </head>
 <body>
 <header class="app-header"><div class="brand"><span class="brand-mark">BS</span><div><b>Building Schedule</b><small>現場工程管理</small></div></div><div class="header-actions"><span class="status"><i></i>保存済み</span><button id="reset" class="ghost">サンプルに戻す</button></div></header>
@@ -20,5 +20,5 @@
 </section>
 </main>
 <dialog id="editor"><form id="editorForm"><div class="dialog-head"><div><span class="eyebrow">TASK DETAIL</span><h2 id="editorTitle">工程を編集</h2></div><button id="dialogClose" type="button" aria-label="閉じる">×</button></div><label>工程名<input id="name" placeholder="例：基礎工事" required></label><div class="two"><label>開始日<input id="start" type="date" required></label><label>終了日<input id="end" type="date" required></label></div><label>前工程<select id="predecessor"><option value="">なし</option></select></label><p class="hint">前工程を設定すると、ネットワーク工程表にも同じ依存関係が反映されます。</p><div class="actions"><button id="cancel" type="button">キャンセル</button><button id="save" type="submit">保存する</button></div></form></dialog>
-<script src="app.js"></script><script>document.getElementById('dialogClose').addEventListener('click',()=>document.getElementById('cancel').click());</script>
+<script src="app.js?v=20261029-2"></script><script>document.getElementById('dialogClose').addEventListener('click',()=>document.getElementById('cancel').click());</script>
 </body></html>
