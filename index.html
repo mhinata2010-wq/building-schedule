@@ -1,21 +1,23 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Building Schedule</title>
-  <style>
-    :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#111827;background:#f6f7f9}
-    *{box-sizing:border-box}body{margin:0}.wrap{min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:min(720px,100%);background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:32px;box-shadow:0 12px 40px rgba(0,0,0,.06)}h1{margin:0 0 10px;font-size:32px}p{margin:0;color:#6b7280;line-height:1.7}.status{display:inline-flex;margin-top:24px;padding:8px 12px;border-radius:999px;background:#ecfdf5;color:#047857;font-weight:700;font-size:14px}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>building schedule</title><link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="wrap">
-    <section class="card">
-      <h1>Building Schedule</h1>
-      <p>建築現場向け工程表アプリの新リポジトリです。現在、旧プロジェクトから必要な機能だけを整理して移行しています。</p>
-      <div class="status">GitHub Pages entry point ready</div>
-    </section>
-  </main>
-</body>
-</html>
+<header><div><b>BUILDING SCHEDULE</b><span>現場工程表</span></div><button id="reset">サンプルに戻す</button></header>
+<main>
+<section class="intro"><p>MASTER SCHEDULE</p><h1>バーからつくる工程表</h1><div class="flow"><b>1 バーを書く</b><i>→</i><b>2 前後関係を入れる</b><i>→</i><b>3 ネットワークへ反映</b></div></section>
+<nav><button class="tab active" data-tab="gantt">工程表</button><button class="tab" data-tab="network">ネットワーク工程表</button></nav>
+<section id="gantt" class="panel">
+<div class="toolbar"><strong>総合工程表</strong><span>空いている日付をドラッグして工程を追加</span><button id="add">＋ 工程を追加</button></div>
+<div class="dates" id="dates"></div><div id="rows"></div>
+</section>
+<section id="network" class="panel" hidden>
+<div class="toolbar"><strong>ネットワーク工程表</strong><span>工程表で入力した前後関係から自動生成</span></div>
+<svg id="networkSvg" viewBox="0 0 1000 520" aria-label="ネットワーク工程表"></svg>
+</section>
+</main>
+<dialog id="editor"><form method="dialog"><h2 id="editorTitle">工程を編集</h2><label>工程名<input id="name" required></label><div class="two"><label>開始日<input id="start" type="date" required></label><label>終了日<input id="end" type="date" required></label></div><label>前工程<select id="predecessor"><option value="">なし</option></select></label><p>前工程を設定するとネットワーク工程表へ同じ関係が反映されます。</p><div class="actions"><button value="cancel">キャンセル</button><button id="save" value="default">保存</button></div></form></dialog>
+<script src="app.js"></script>
+</body></html>
