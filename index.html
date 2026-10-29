@@ -18,6 +18,6 @@
 <svg id="networkSvg" viewBox="0 0 1000 520" aria-label="ネットワーク工程表"></svg>
 </section>
 </main>
-<dialog id="editor"><form method="dialog"><h2 id="editorTitle">工程を編集</h2><label>工程名<input id="name" required></label><div class="two"><label>開始日<input id="start" type="date" required></label><label>終了日<input id="end" type="date" required></label></div><label>前工程<select id="predecessor"><option value="">なし</option></select></label><p>前工程を設定するとネットワーク工程表へ同じ関係が反映されます。</p><div class="actions"><button value="cancel">キャンセル</button><button id="save" value="default">保存</button></div></form></dialog>
+<dialog id="editor"><form id="editorForm"><h2 id="editorTitle">工程を編集</h2><label>工程名<input id="name" required></label><div class="two"><label>開始日<input id="start" type="date" required></label><label>終了日<input id="end" type="date" required></label></div><label>前工程<select id="predecessor"><option value="">なし</option></select></label><p>前工程を設定するとネットワーク工程表へ同じ関係が反映されます。</p><div class="actions"><button id="cancel" type="button">キャンセル</button><button id="save" type="submit">保存</button></div></form></dialog>
 <script src="app.js"></script>
 </body></html>
