@@ -12,6 +12,8 @@
   <div class="project-name">総合工程表<small>Master Schedule</small></div>
   <nav class="side-nav">
     <button class="side-link active" data-view="gantt"><span class="nav-icon">▦</span><span>工程表</span></button>
+    <button class="side-link" data-view="today"><span class="nav-icon">◷</span><span>今日の予定</span></button>
+    <button class="side-link" data-view="progress"><span class="nav-icon">◉</span><span>進捗度</span></button>
     <button class="side-link" data-view="network"><span class="nav-icon">⌘</span><span>ネットワーク工程表</span></button>
   </nav>
   <div class="sidebar-note"><span>操作</span><p>日付の上を横にドラッグして工程バーを追加できます。</p></div>
@@ -33,6 +35,8 @@
       <div class="schedule-scroll"><div class="schedule-min"><div class="dates" id="dates"></div><div id="rows"></div></div></div>
     </div>
   </section>
+  <section id="today" class="view-section" hidden><div class="block"><div class="block-head"><div><strong>今日の予定</strong><small>今日に重なる工程と進捗状況</small></div><span class="badge" id="todayCount">0件</span></div><div id="todayItems" class="overview-list"></div></div></section>
+  <section id="progress" class="view-section" hidden><div class="block"><div class="block-head"><div><strong>工程の進捗度</strong><small>工程ごとの入力値から集計</small></div><span class="badge">PROGRESS</span></div><div class="progress-dashboard"><div class="donut" id="progressDonut" role="img" aria-label="全体進捗"><div class="donut-center"><strong id="progressPercent">0%</strong><small>全体進捗</small></div></div><div class="progress-detail"><strong id="progressSummary"></strong><p>進捗率は各工程の編集画面から更新できます。</p><div id="progressItems" class="overview-list"></div></div></div></div></section>
   <section id="network" class="view-section" hidden>
     <div class="block">
       <div class="block-head"><div><strong>ネットワーク工程表</strong><small>工程表で設定した前後関係を同じデータから表示</small></div><span class="badge">自動反映</span></div>
@@ -42,6 +46,6 @@
 </main>
 </div>
 </div>
-<dialog id="editor"><form id="editorForm"><div class="dialog-head"><div><span>工程情報</span><h2 id="editorTitle">工程を編集</h2></div><button id="dialogClose" type="button" aria-label="閉じる">×</button></div><label>工程名<input id="name" placeholder="例：基礎工事" required></label><div class="two"><label>開始日<input id="start" type="date" required></label><label>終了日<input id="end" type="date" required></label></div><label>前工程<select id="predecessor"><option value="">なし</option></select></label><p class="hint">前工程を設定すると、ネットワーク工程表にも同じ前後関係が反映されます。</p><div class="actions"><button id="cancel" type="button">キャンセル</button><button id="save" type="submit">保存する</button></div></form></dialog>
+<dialog id="editor"><form id="editorForm"><div class="dialog-head"><div><span>工程情報</span><h2 id="editorTitle">工程を編集</h2></div><button id="dialogClose" type="button" aria-label="閉じる">×</button></div><label>工程名<input id="name" placeholder="例：基礎工事" required></label><div class="two"><label>開始日<input id="start" type="date" required></label><label>終了日<input id="end" type="date" required></label></div><label>進捗率（%）<input id="progressInput" type="number" min="0" max="100" step="1" value="0"></label><label>前工程<select id="predecessor"><option value="">なし</option></select></label><p class="hint">前工程を設定すると、ネットワーク工程表にも同じ前後関係が反映されます。</p><div class="actions"><button id="cancel" type="button">キャンセル</button><button id="save" type="submit">保存する</button></div></form></dialog>
 <script src="app.js?v=20261030-template-ui"></script><script>document.getElementById('dialogClose').addEventListener('click',()=>document.getElementById('cancel').click());</script>
 </body></html>
