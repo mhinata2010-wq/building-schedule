@@ -2,46 +2,55 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Building Schedule｜現場工程表</title><link rel="stylesheet" href="style.css?v=20261030-ctc-poc"><link rel="stylesheet" href="template-production.css?v=20261030-ctc-poc">
+<title>Building Schedule｜工程を考えるキャンバス</title>
+<link rel="stylesheet" href="style.css?v=20261031-direct-canvas">
 </head>
 <body>
 <div class="app-shell">
-<aside class="sidebar">
-  <div class="sidebar-brand"><span class="brand-mark">BS</span><strong>BUILDING<br>SCHEDULE</strong></div>
-  <div class="project-label">PROJECT</div>
-  <div class="project-name">総合工程表<small>Master Schedule</small></div>
-  <nav class="side-nav">
-    <button class="side-link active" data-view="gantt"><span class="nav-icon">▦</span><span>工程表</span></button>
-    <button class="side-link" data-view="network"><span class="nav-icon">⌘</span><span>ネットワーク工程表</span></button>
-  </nav>
-  <div class="sidebar-note"><span>操作</span><p>空いている行を横にドラッグして工程を作成。工程バーはそのまま移動・伸縮できます。</p></div>
-</aside>
-<div class="workspace">
 <header class="topbar">
-  <button class="menu-button" aria-label="メニュー">☰</button>
-  <div class="topbar-title"><strong>総合工程表</strong><span>/ 現場工程管理 PoC</span></div>
-  <div class="topbar-actions"><span class="save-state"><i></i>端末に保存済み</span><button id="reset" class="icon-action">↻ <span>サンプルに戻す</span></button></div>
+  <div class="brand"><span class="brand-mark">BS</span><div><strong>Building Schedule</strong><small>工程を考えるキャンバス</small></div></div>
+  <div class="project-title"><span>PROJECT</span><strong>総合工程表</strong></div>
+  <div class="top-actions"><span id="saveState" class="save-state"><i></i>保存済み</span><button id="reset" class="ghost">↻ サンプルに戻す</button></div>
 </header>
-<main class="content">
-  <div class="content-head">
-    <div><p class="breadcrumb">PROJECT / MASTER SCHEDULE</p><h1>総合工程表</h1><p class="poc-copy">紙のように工程を書き、前後関係を設定するとネットワーク工程表へ反映します。</p></div>
-    <button id="add" class="primary">＋ 工程を追加</button>
-  </div>
-  <section id="gantt" class="view-section">
-    <div class="block">
-      <div class="block-head"><div><strong>工程タイムライン</strong><small>ドラッグで作成・移動。左右端をドラッグして期間を変更</small></div><span class="badge">工程表</span></div>
-      <div class="schedule-scroll"><div class="schedule-min"><div class="dates" id="dates"></div><div id="rows"></div></div></div>
+<main class="workspace">
+  <section class="commandbar">
+    <div class="mode-tabs"><button class="mode active" data-view="gantt">工程を考える</button><button class="mode" data-view="network">前後関係を見る</button></div>
+    <div class="canvas-tools">
+      <button id="today" class="tool">今日</button>
+      <div class="zoom-group" aria-label="表示単位"><button data-zoom="day" class="zoom active">日</button><button data-zoom="week" class="zoom">週</button><button data-zoom="month" class="zoom">月</button></div>
+      <button id="fit" class="tool">全体表示</button>
+      <button id="addRow" class="primary">＋ 工程</button>
     </div>
   </section>
-  <section id="network" class="view-section" hidden>
-    <div class="block">
-      <div class="block-head"><div><strong>ネットワーク工程表</strong><small>工程表で設定した前後関係を同じデータから自動表示</small></div><span class="badge">自動反映</span></div>
-      <svg id="networkSvg" viewBox="0 0 1000 520" aria-label="ネットワーク工程表"></svg>
+
+  <section id="gantt" class="view-section">
+    <div class="guidance"><strong>工程をそのまま動かして検討</strong><span>空白を横にドラッグして作成 ／ バーを移動 ／ 端を伸縮 ／ 左の ⠿ で順番変更</span></div>
+    <div class="schedule-card">
+      <div class="schedule-viewport" id="scheduleViewport">
+        <div class="schedule-canvas" id="scheduleCanvas">
+          <div class="corner"><span>工程</span><small>ドラッグで並べ替え</small></div>
+          <div class="dates" id="dates"></div>
+          <div class="rows" id="rows"></div>
+        </div>
+      </div>
+      <div class="overview-bar"><div><strong>全体</strong><span id="rangeLabel"></span></div><div class="mini-map" id="miniMap"><div id="miniTasks"></div><div class="mini-window" id="miniWindow"></div></div></div>
     </div>
+  </section>
+
+  <section id="network" class="view-section" hidden>
+    <div class="network-head"><div><strong>前後関係</strong><span>工程キャンバスと同じデータから自動生成</span></div></div>
+    <div class="network-wrap"><svg id="networkSvg" viewBox="0 0 1200 600" aria-label="ネットワーク工程表"></svg></div>
   </section>
 </main>
 </div>
-</div>
-<dialog id="editor"><form id="editorForm"><div class="dialog-head"><div><span>工程情報</span><h2 id="editorTitle">工程を編集</h2></div><button id="dialogClose" type="button" aria-label="閉じる">×</button></div><label>工程名<input id="name" placeholder="例：基礎工事" required></label><div class="two"><label>開始日<input id="start" type="date" required></label><label>終了日<input id="end" type="date" required></label></div><label>前工程<select id="predecessor"><option value="">なし</option></select></label><p class="hint">前工程を設定すると、ネットワーク工程表にも同じ前後関係が反映されます。</p><div class="actions"><button id="cancel" type="button">キャンセル</button><button id="save" type="submit">保存する</button></div></form></dialog>
-<script src="app.js?v=20261030-ctc-poc"></script><script>document.getElementById('dialogClose').addEventListener('click',()=>document.getElementById('cancel').click());</script>
+
+<aside id="inspector" class="inspector" aria-hidden="true">
+  <div class="inspector-head"><div><span>工程の詳細</span><h2 id="inspectorTitle">工程</h2></div><button id="closeInspector" aria-label="閉じる">×</button></div>
+  <label>工程名<input id="taskName"></label>
+  <div class="two"><label>開始日<input id="taskStart" type="date"></label><label>終了日<input id="taskEnd" type="date"></label></div>
+  <label>前工程<select id="taskPred"><option value="">なし</option></select></label>
+  <p class="hint">日付はバーを直接動かす方が速く変更できます。詳細入力は必要なときだけ使います。</p>
+  <button id="deleteTask" class="danger">工程を削除</button>
+</aside>
+<script src="app.js?v=20261031-direct-canvas"></script>
 </body></html>
