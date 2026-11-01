@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="field-today.css?v=20261101-1">
 <link rel="stylesheet" href="field-status.css?v=20261101-1">
 <link rel="stylesheet" href="field-lookahead.css?v=20261101-1">
+<link rel="stylesheet" href="field-quick-update.css?v=20261101-1">
 </head>
 <body>
 <div class="app-shell">
@@ -18,5 +19,5 @@
 <section id="network" class="view-section" hidden><div class="network-head"><div><strong>前後関係</strong><span>工程キャンバスと同じデータから自動生成</span></div></div><div class="network-wrap"><svg id="networkSvg" viewBox="0 0 1200 600" aria-label="ネットワーク工程表"></svg></div></section>
 </main></div>
 <aside id="inspector" class="inspector" aria-hidden="true"><div class="inspector-head"><div><span>工程の詳細</span><h2 id="inspectorTitle">工程</h2></div><button id="closeInspector" aria-label="閉じる">×</button></div><label>工程名<input id="taskName"></label><div class="two"><label>開始日<input id="taskStart" type="date"></label><label>終了日<input id="taskEnd" type="date"></label></div><label>前工程<select id="taskPred"><option value="">なし</option></select></label><p class="hint">日付はバーを直接動かす方が速く変更できます。詳細入力は必要なときだけ使います。</p><button id="deleteTask" class="danger">工程を削除</button></aside>
-<script src="app.js?v=20261031-direct-canvas"></script><script src="field-today.js?v=20261101-1"></script><script src="field-status.js?v=20261101-1"></script><script src="field-lookahead.js?v=20261101-1"></script>
+<script src="app.js?v=20261031-direct-canvas"></script><script src="field-today.js?v=20261101-1"></script><script src="field-status.js?v=20261101-1"></script><script src="field-lookahead.js?v=20261101-1"></script><script src="field-quick-update.js?v=20261101-1"></script>
 </body></html>
