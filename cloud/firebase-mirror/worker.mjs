@@ -1,6 +1,6 @@
 /**
  * One-shot sync, designed for a trusted scheduled worker. Not browser code.
- * Run from cloud/firebase-mirror with Node 20+ after configuring:
+ * Run from cloud/firebase-mirror with Node 22+ after configuring:
  *   DATABASE_URL (private, server only)
  *   FIREBASE_PROJECT_ID
  *   Application Default Credentials (Google Cloud IAM or server-side key)
