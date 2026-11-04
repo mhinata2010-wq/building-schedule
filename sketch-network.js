@@ -66,10 +66,62 @@
   intro.className='sketch-helper';
   intro.innerHTML='<div><span class="sketch-helper-icon">✎</span><strong>なぞって工程を描く</strong><small>クリックなら1日、横に引くとその期間で追加されます。</small></div><span>編集は自動保存</span>';
   $('#gantt .guidance')?.after(intro);
+  // Discrete zoom prevents touch-gesture conflicts with card editing.
+  const networkZoomSteps=[0.75,1,1.25];
+  let networkZoom=1;
+  let networkNaturalWidth=870,networkNaturalHeight=460;
+  let networkFit=false;
+  function networkScrollArea(){return $('#network .network-wrap');}
+  function applyNetworkZoom(preserveCenter=true){
+    const area=networkScrollArea(),svg=$('#networkSvg');
+    if(!area||!svg)return;
+    const prevW=svg.getBoundingClientRect().width||networkNaturalWidth;
+    const prevH=svg.getBoundingClientRect().height||networkNaturalHeight;
+    const centerX=area.scrollLeft+area.clientWidth/2;
+    const centerY=area.scrollTop+area.clientHeight/2;
+    const fitScale=Math.min(1,area.clientWidth/networkNaturalWidth);
+    const scale=networkFit?fitScale:networkZoom;
+    const newW=networkNaturalWidth*scale,newH=networkNaturalHeight*scale;
+    svg.style.width=newW+'px';
+    svg.style.height=newH+'px';
+    svg.style.minWidth='0';
+    svg.style.minHeight='0';
+    if(preserveCenter){
+      area.scrollLeft=Math.max(0,centerX/prevW*newW-area.clientWidth/2);
+      area.scrollTop=Math.max(0,centerY/prevH*newH-area.clientHeight/2);
+    }
+    const label=$('#networkZoomLabel');
+    if(label)label.textContent=networkFit?'全体':Math.round(networkZoom*100)+'%';
+    $('#networkZoomOut')?.toggleAttribute('disabled',!networkFit&&networkZoom===networkZoomSteps[0]);
+    $('#networkZoomIn')?.toggleAttribute('disabled',!networkFit&&networkZoom===networkZoomSteps[networkZoomSteps.length-1]);
+    $('#networkZoomFit')?.setAttribute('aria-pressed',String(networkFit));
+  }
+  function setNetworkZoom(direction){
+    const current=networkFit?0.75:networkZoom;
+    let idx=networkZoomSteps.findIndex(n=>n>=current-0.001);
+    idx=Math.max(0,Math.min(networkZoomSteps.length-1,idx+direction));
+    networkFit=false;
+    networkZoom=networkZoomSteps[idx];
+    applyNetworkZoom();
+  }
   const net=$('#network');
   if(net){
     const head=net.querySelector('.network-head');
     if(head)head.innerHTML='<div><strong>ネットワーク工程表</strong><span>工程の前後関係を自動図解。ノードをクリックすると編集できます。</span></div><button class="ws-button" id="networkAddDep">前後関係を編集</button>';
+    const toolbar=document.createElement('div');
+    toolbar.className='network-zoom-toolbar';
+    toolbar.setAttribute('role','group');
+    toolbar.setAttribute('aria-label','ネットワーク工程表の拡大縮小');
+    toolbar.innerHTML='<button type="button" id="networkZoomOut" aria-label="縮小">−</button><output id="networkZoomLabel" aria-live="polite">100%</output><button type="button" id="networkZoomIn" aria-label="拡大">＋</button><button type="button" id="networkZoomFit" aria-pressed="false">全体表示</button>';
+    head?.after(toolbar);
+    $('#networkZoomOut').addEventListener('click',()=>setNetworkZoom(-1));
+    $('#networkZoomIn').addEventListener('click',()=>setNetworkZoom(1));
+    $('#networkZoomFit').addEventListener('click',()=>{
+      networkFit=true;
+      applyNetworkZoom();
+      const area=networkScrollArea();if(area){area.scrollLeft=0;area.scrollTop=0;}
+    });
+    window.addEventListener('resize',()=>applyNetworkZoom(false));
     $('#networkAddDep')?.addEventListener('click',()=>{
       const first=tasks.find(t=>t.pred)||tasks[0];if(first)openInspector(first.id);else $('.mode[data-view="gantt"]')?.click();
     });
@@ -137,7 +189,8 @@
     }).join('');
     svg.setAttribute('viewBox','0 0 '+width+' '+height);
     svg.setAttribute('width',String(width));svg.setAttribute('height',String(height));
-    svg.style.width=width+'px';svg.style.minWidth='0';svg.style.height=height+'px';svg.style.minHeight='0';
+    networkNaturalWidth=width;networkNaturalHeight=height;
+    applyNetworkZoom(false);
     svg.innerHTML='<defs><marker id="netArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="context-stroke" stroke-width="1.5"/></marker></defs>'+edgeMarkup+nodeMarkup+(tasks.length?'':'<text x="52" y="75" class="net-title">工程がまだありません。工程を考える画面から追加してください。</text>');
     const legends=$('#networkLegend');
     if(legends)legends.innerHTML='<div><strong>'+tasks.length+'</strong><span>工程</span></div><div><strong>'+links.length+'</strong><span>前後関係</span></div><div><strong>'+totalLongest+'日</strong><span>最長チェーン（工程日数の合計）</span></div><div class="net-legend-note"><i></i>青枠：最長の依存チェーン（工期の正式なCPM計算ではありません）</div>';
