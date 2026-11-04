@@ -13,7 +13,7 @@
     ['reports','帳票・印刷','現場で共有する工程の一覧'],
     ['settings','設定','データの保存と読み込み']
   ];
-  let currentScreen = 'today', orderMode = 'auto', includeDone = false, reportType = 'all';
+  let currentScreen = 'today', orderMode = localStorage.getItem('building-schedule-order-mode')==='manual'?'manual':'auto', includeDone = false, reportType = 'all';
   let project = loadProject();
   let ranks = loadRanks();
   function loadProject(){
@@ -116,6 +116,7 @@
       '<button class="today-item" data-ws-open="'+esc(t.id)+'"><span class="ws-today-rank">'+(i+1)+'</span><span class="today-copy"><strong>'+esc(t.name)+'</strong><small>'+esc(t.assignee||'担当未設定')+' ・ '+taskNote(t)+'</small></span><span class="today-chip">'+nProgress(t)+'%</span></button>'
     ).join(''):'<div class="empty-today">本日着手する未完了の工程はありません。次に始まる工程を確認できます。</div>';
     const title=$('.today-hero h1');if(title)title.textContent='今日の予定';
+    if($('#todayCount'))$('#todayCount').textContent=items.length+' 件';
     const section=$('.today-primary .card-heading strong');if(section)section.textContent='今日やること（優先順）';
     const action=$('.today-primary .text-button');if(action){action.removeAttribute('data-go');action.dataset.wsAction='priority';action.textContent='優先順位で見る ↗';}
     const intro=$('.field-principle');if(intro){const st=intro.querySelector('strong');if(st)st.textContent='「今日の予定」から、必要な作業だけ確認';}
@@ -190,7 +191,7 @@
     const blob=new Blob([content],{type:type||'application/octet-stream'});
     const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
   }
-  function csvCell(s){return '"'+String(s==null?'':s).replace(/"/g,'""')+'"';}
+  function csvCell(s){let v=String(s==null?'':s);if(/^[=+@\-\t\r]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';}
   function exportCSV(){
     const fields=[['No.','工程名','開始日','終了日','優先度','進捗率','状態','担当','前工程']];
     reportTasks().forEach((t,i)=>fields.push([i+1,t.name,t.start,t.end,priorityName[priority(t)],nProgress(t)+'%',statusName[status(t)],t.assignee||'',tasks.find(x=>x.id===t.pred)?.name||'']));
@@ -229,7 +230,7 @@
     [source[index],source[other]]=[source[other],source[index]];
     ranks=source.concat(tasks.map(t=>t.id).filter(k=>!source.includes(k)));
     orderMode='manual';
-    localStorage.setItem(rankKey,JSON.stringify(ranks));renderPages();
+    localStorage.setItem('building-schedule-order-mode',orderMode);localStorage.setItem(rankKey,JSON.stringify(ranks));renderPages();
   }
   function quickProgress(t){
     if(!t)return;t.progress=Math.min(100,nProgress(t)+25);
@@ -251,12 +252,12 @@
       const up=e.target.closest('[data-move-up]');if(up){changeRank(up.dataset.moveUp,-1);return;}
       const down=e.target.closest('[data-move-down]');if(down){changeRank(down.dataset.moveDown,1);return;}
       const progress=e.target.closest('[data-progress-step]');if(progress){quickProgress(tasks.find(t=>t.id===progress.dataset.progressStep));return;}
-      const order=e.target.closest('[data-order-mode]');if(order){orderMode=order.dataset.orderMode;renderPages();return;}
+      const order=e.target.closest('[data-order-mode]');if(order){orderMode=order.dataset.orderMode;localStorage.setItem('building-schedule-order-mode',orderMode);renderPages();return;}
       const report=e.target.closest('[data-report-type]');if(report){reportType=report.dataset.reportType;renderReports();}
     });
     $('#mainContent').addEventListener('change',e=>{
       const t=e.target;
-      if(t.matches('[data-priority]')){const task=tasks.find(x=>x.id===t.dataset.priority);if(task){task.priority=Number(t.value);orderMode='auto';persist();}}
+      if(t.matches('[data-priority]')){const task=tasks.find(x=>x.id===t.dataset.priority);if(task){task.priority=Number(t.value);orderMode='auto';localStorage.setItem('building-schedule-order-mode',orderMode);persist();}}
       if(t.matches('[data-project-field]')){project[t.dataset.projectField]=t.value.trim();if(!project.name)project.name='総合工程表';localStorage.setItem(projectKey,JSON.stringify(project));renderPages();}
       if(t.id==='showDone'){includeDone=t.checked;renderPriority();}
       if(t.id==='wsImport'){importJSON(t.files[0]);}
