@@ -38,7 +38,7 @@ Supabase Auth + Postgres (canonical, revision)
 - `database/firebase-outbox.sql`：DB更新時のイベント記録トリガー、旧データのバックフィル
 - `firebase/firestore.rules`：バックアップ用コレクションへのブラウザアクセスを全拒否
 - `cloud/firebase-mirror/mirror-core.mjs`：トランザクションとRevisionによる複製ロジック
-- `cloud/firebase-mirror/worker.mjs`：Node 20+のサーバー側実行エントリーポイント
+- `cloud/firebase-mirror/worker.mjs`：Node 22+のサーバー側実行エントリーポイント
 - `cloud/firebase-mirror/package.json`：固定したAdmin SDK / PostgreSQLドライバの依存関係
 - `cloud/firebase-mirror/test.mjs`：正常保存、古いRevision、障害、空キュー、巨大データのテスト
 
@@ -48,7 +48,7 @@ Supabase Auth + Postgres (canonical, revision)
 3. 既存Firestoreを共有している場合、`firebase/firestore.rules` の全拒否ルールをそのままデプロイしない。**他アプリのアクセスまで拒否する可能性がある**。専用プロジェクトでの適用を優先する。
 4. Supabase `database/schema.sql` を適用してRLSを検証し、続けて `database/firebase-outbox.sql` を適用。Security Definerトリガーの権限・`private` schemaの非公開設定をレビューする。
 5. `DATABASE_URL`、`FIREBASE_PROJECT_ID`、Application Default Credentialsを**サーバー環境**にだけ設定。GitHub Pages、JavaScriptバンドル、ログ、Issueへ秘密を含めない。
-6. ワーカー用ディレクトリで依存関係をインストールし、lockfileを生成してコミットしてから本番では`npm ci`を使う。Node 20+で`npm test`実行。
+6. ワーカー用ディレクトリで依存関係をインストールし、lockfileを生成してコミットしてから本番では`npm ci`を使う。Node 22+で`npm test`実行。
 7. ジョブとして `node worker.mjs` を定期実行し、未処理件数・エラー・複製遅延を監視。ワーカーは1回につき最大100イベントを処理する。
 8. 通常保存、同時編集、Firebase一時停止、再試行、二重送信、両DB一致、他ユーザーアクセス拒否、サインアウト・アカウント削除をE2E検証。
 9. **削除連携・データ保持ポリシーを実装してから本番導入**。現行のOutboxはinsert/update対応で、削除イベントの伝播はまだない。ユーザー削除後のバックアップ残存を許容したまま公開しない。
