@@ -175,3 +175,14 @@ body[data-current-view]:not([data-current-view="gantt"]) .commandbar{display:non
   body[data-current-view="reports"] .ws-report-table{font-size:10px}
   body[data-current-view="reports"] .ws-report-table tr{break-inside:avoid}
 }
+/* Bottom overview is a grab-and-drag scrollbar (mouse, pen, touch + keyboard). */
+.overview-bar .mini-hint{display:block;color:#2563eb;font-size:10px;font-weight:650;margin-top:4px}
+#miniMap{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain;outline-offset:3px}
+#miniMap.dragging{cursor:grabbing}
+#miniMap:focus-visible{outline:3px solid #2563eb;border-radius:5px}
+#miniWindow{border:2px solid #2563eb;border-radius:5px;background:rgba(37,99,235,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);pointer-events:none;transition:none}
+#miniWindow::before,#miniWindow::after{content:"";position:absolute;top:35%;height:30%;width:2px;border-radius:2px;background:#2563eb;opacity:.65}
+#miniWindow::before{left:8px}
+#miniWindow::after{right:8px}
+#miniMap.dragging #miniWindow{background:rgba(37,99,235,.22);border-color:#1553c8}
+@media(max-width:650px){.overview-bar{height:80px}.overview-bar .mini-hint{font-size:9px;line-height:1.4}.mini-map{height:42px}}

@@ -24,8 +24,92 @@ function syncInspector(){const t=tasks.find(x=>x.id===selected);if(!t)return clo
 ['taskName','taskStart','taskEnd','taskPred'].forEach(id=>document.querySelector('#'+id).addEventListener('change',()=>{const t=tasks.find(x=>x.id===selected);if(!t)return;const name=document.querySelector('#taskName').value.trim(),start=document.querySelector('#taskStart').value,end=document.querySelector('#taskEnd').value;if(!name||!start||!end||end<start)return syncInspector();Object.assign(t,{name,start,end,pred:document.querySelector('#taskPred').value});persist()}));
 document.querySelector('#closeInspector').onclick=closeInspector;document.querySelector('#deleteTask').onclick=()=>{if(!selected)return;tasks=tasks.filter(t=>t.id!==selected).map(t=>t.pred===selected?{...t,pred:''}:t);closeInspector();persist()};
 function renderMini(){const mini=document.querySelector('#miniTasks');mini.innerHTML=tasks.map((t,i)=>{const s=clamp(idx(t.start),0,TOTAL_DAYS-1),e=clamp(idx(t.end),s,TOTAL_DAYS-1);return `<i class="mini-task" style="left:${s/TOTAL_DAYS*100}%;width:${(e-s+1)/TOTAL_DAYS*100}%;top:${4+(i%7)*4}px"></i>`}).join('');updateMiniWindow()}
-function updateMiniWindow(){const vp=document.querySelector('#scheduleViewport'),win=document.querySelector('#miniWindow');if(!vp||!win)return;const total=TOTAL_DAYS*dayWidth(),usable=Math.max(0,vp.clientWidth-260),left=Math.max(0,vp.scrollLeft-260);win.style.left=(left/total*100)+'%';win.style.width=Math.min(100,usable/total*100)+'%'}
-document.querySelector('#scheduleViewport').addEventListener('scroll',updateMiniWindow);document.querySelector('#miniMap').onclick=e=>{const vp=document.querySelector('#scheduleViewport'),r=e.currentTarget.getBoundingClientRect(),ratio=(e.clientX-r.left)/r.width;vp.scrollLeft=Math.max(0,ratio*TOTAL_DAYS*dayWidth()-vp.clientWidth/2)};
+function miniMapGeometry(){
+  const viewport=document.querySelector('#scheduleViewport');
+  const map=document.querySelector('#miniMap');
+  const timeline=TOTAL_DAYS*dayWidth();
+  const label=document.querySelector('.corner');
+  const labelWidth=label?parseFloat(getComputedStyle(label).width)||260:260;
+  const visible=Math.min(timeline,Math.max(0,viewport.clientWidth-labelWidth));
+  const maxScroll=Math.max(0,viewport.scrollWidth-viewport.clientWidth);
+  return {viewport,map,timeline,visible,maxScroll};
+}
+function updateMiniWindow(){
+  const windowEl=document.querySelector('#miniWindow');
+  const {viewport,map,timeline,visible,maxScroll}=miniMapGeometry();
+  if(!windowEl||!map)return;
+  // scrollLeft is the timeline's first visible pixel because the task labels are sticky.
+  const left=maxScroll?Math.min(1,Math.max(0,viewport.scrollLeft/timeline)):0;
+  const width=maxScroll?Math.min(1,visible/timeline):1;
+  windowEl.style.left=(left*100)+'%';
+  windowEl.style.width=(width*100)+'%';
+  const percent=maxScroll?Math.round(100*Math.max(0,Math.min(maxScroll,viewport.scrollLeft))/maxScroll):0;
+  map.setAttribute('aria-valuenow',String(percent));
+  map.setAttribute('aria-valuetext',maxScroll?'表示位置 '+percent+'%':'全期間を表示中');
+}
+document.querySelector('#scheduleViewport').addEventListener('scroll',updateMiniWindow);
+const miniMap=document.querySelector('#miniMap');
+let miniDrag=null;
+function panMiniTo(clientX){
+  if(!miniDrag)return;
+  const {viewport,map,timeline,maxScroll}=miniMapGeometry();
+  const box=map.getBoundingClientRect();
+  if(box.width<=0)return;
+  const windowLeft=(clientX-box.left-miniDrag.grabOffset)/box.width;
+  viewport.scrollLeft=clamp(windowLeft*timeline,0,maxScroll);
+  updateMiniWindow();
+}
+miniMap.addEventListener('pointerdown',event=>{
+  if(event.pointerType==='mouse'&&event.button!==0)return;
+  const {viewport,map,timeline,visible,maxScroll}=miniMapGeometry();
+  if(!maxScroll)return;
+  const box=map.getBoundingClientRect();
+  if(!box.width)return;
+  const point=event.clientX-box.left;
+  const left=viewport.scrollLeft/timeline*box.width;
+  const windowWidth=Math.min(1,visible/timeline)*box.width;
+  const inside=point>=left&&point<=left+windowWidth;
+  miniDrag={
+    pointerId:event.pointerId,
+    // Grab where pressed inside the blue window; click elsewhere centers the window.
+    grabOffset:inside?point-left:windowWidth/2
+  };
+  miniMap.setPointerCapture(event.pointerId);
+  miniMap.classList.add('dragging');
+  panMiniTo(event.clientX);
+  event.preventDefault();
+});
+miniMap.addEventListener('pointermove',event=>{
+  if(miniDrag&&miniDrag.pointerId===event.pointerId)panMiniTo(event.clientX);
+});
+function finishMiniDrag(event){
+  if(!miniDrag||miniDrag.pointerId!==event.pointerId)return;
+  miniDrag=null;
+  miniMap.classList.remove('dragging');
+  if(miniMap.hasPointerCapture(event.pointerId))miniMap.releasePointerCapture(event.pointerId);
+}
+miniMap.addEventListener('pointerup',finishMiniDrag);
+miniMap.addEventListener('pointercancel',finishMiniDrag);
+miniMap.addEventListener('lostpointercapture',event=>{
+  if(miniDrag&&miniDrag.pointerId===event.pointerId){miniDrag=null;miniMap.classList.remove('dragging');}
+});
+miniMap.addEventListener('keydown',event=>{
+  const {viewport,maxScroll}=miniMapGeometry();
+  const step=dayWidth()*(event.shiftKey?14:3);
+  const next={
+    ArrowRight:viewport.scrollLeft+step,
+    ArrowLeft:viewport.scrollLeft-step,
+    PageDown:viewport.scrollLeft+viewport.clientWidth,
+    PageUp:viewport.scrollLeft-viewport.clientWidth,
+    Home:0,
+    End:maxScroll
+  }[event.key];
+  if(next===undefined)return;
+  event.preventDefault();
+  viewport.scrollLeft=clamp(next,0,maxScroll);
+  updateMiniWindow();
+});
+window.addEventListener('resize',updateMiniWindow);
 document.querySelectorAll('.zoom').forEach(b=>b.onclick=()=>{zoom=b.dataset.zoom;document.querySelectorAll('.zoom').forEach(x=>x.classList.toggle('active',x===b));render()});document.querySelector('#today').onclick=()=>{document.querySelector('#scheduleViewport').scrollLeft=Math.max(0,14*dayWidth()-300)};document.querySelector('#fit').onclick=()=>{zoom='month';document.querySelectorAll('.zoom').forEach(x=>x.classList.toggle('active',x.dataset.zoom==='month'));render();document.querySelector('#scheduleViewport').scrollLeft=0};document.querySelector('#addRow').onclick=()=>{tasks.push({id:crypto.randomUUID(),name:'新しい工程',start:iso(add(base,14)),end:iso(add(base,16)),pred:''});persist();setTimeout(()=>{const a=document.querySelectorAll('.task-name');a[a.length-1]?.focus();a[a.length-1]?.select()},0)};document.querySelector('#reset').onclick=()=>{localStorage.removeItem(STORE);tasks=[];seed()};
 document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('active',x===b));document.querySelector('#gantt').hidden=b.dataset.view!=='gantt';document.querySelector('#network').hidden=b.dataset.view!=='network';if(b.dataset.view==='network')drawNetwork()});
 function drawNetwork(){const svg=document.querySelector('#networkSvg');if(!svg)return;const depth=new Map();function dep(t,seen=new Set()){if(depth.has(t.id))return depth.get(t.id);if(!t.pred||seen.has(t.id)){depth.set(t.id,0);return 0}const p=tasks.find(x=>x.id===t.pred),v=p?dep(p,new Set([...seen,t.id]))+1:0;depth.set(t.id,v);return v}tasks.forEach(t=>dep(t));const levels={};tasks.forEach(t=>(levels[depth.get(t.id)]??=[]).push(t));const pos=new Map();Object.entries(levels).forEach(([lv,list])=>list.forEach((t,i)=>pos.set(t.id,{x:60+Number(lv)*220,y:60+i*100})));let edges='';tasks.forEach(t=>{const a=pos.get(t.pred),b=pos.get(t.id);if(a&&b)edges+=`<path class="edge" d="M${a.x+155},${a.y+32} C${a.x+180},${a.y+32} ${b.x-25},${b.y+32} ${b.x},${b.y+32}"/>`});const nodes=tasks.map((t,i)=>{const p=pos.get(t.id);return `<g class="node" transform="translate(${p.x},${p.y})"><rect width="155" height="64"/><text class="code" x="12" y="18">TASK ${String(i+1).padStart(2,'0')}</text><text x="12" y="39">${esc(t.name).slice(0,15)}</text><text x="12" y="54" style="font-size:8px;fill:#8a929a">${t.start.slice(5)} → ${t.end.slice(5)}</text></g>`}).join('');svg.innerHTML='<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#a8afb6"/></marker></defs>'+edges+nodes}
