@@ -199,3 +199,19 @@ body[data-current-view]:not([data-current-view="gantt"]) .commandbar{display:non
 #network .network-wrap{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
 #networkSvg{max-width:none;transform:none;transform-origin:top left}
 @media(max-width:700px){.network-zoom-toolbar{justify-content:center;gap:8px;padding:8px}.network-zoom-toolbar button{min-height:44px;min-width:44px}}
+
+/* Explicit trash affordance in the handwritten Gantt editor. */
+.task-trash{flex:none;display:grid;place-items:center;width:32px;height:34px;border:1px solid transparent;border-radius:8px;background:transparent;color:#8c9a92;cursor:pointer}
+.task-trash svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.task-trash:hover,.task-trash:focus-visible{background:#fff0ec;color:#b53d34;border-color:#f0c9c4}
+.task-trash:focus-visible{outline:2px solid #b53d34;outline-offset:1px}
+.save-task-dates{width:100%;border:1px solid #c8dbcf;background:#eaf5ee;color:#216747;font-size:13px;font-weight:750;padding:12px 14px;border-radius:9px;min-height:44px}
+.save-task-dates:hover{background:#dceee3;border-color:#91bba0}
+.save-task-dates:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+@media(max-width:760px){
+  :root{--label:220px}
+  .task-label{gap:4px;padding:0 6px}
+  .task-label .task-number{font-size:8px;width:13px}
+  .task-trash{width:32px;height:40px}
+  .task-label .detail-button{padding:6px 5px}
+}
