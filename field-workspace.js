@@ -7,7 +7,7 @@
   const priorityName = {1:'最優先',2:'高',3:'通常',4:'低'};
   const statusName = {planned:'予定', 'in-progress':'進行中',blocked:'要確認',done:'完了'};
   const screens = [
-    ['priority','優先タスク','やるべき作業を順位順に'],
+    ['priority','タスク管理','やるべき作業を順位順に'],
     ['projects','現場・プロジェクト','現場と工程の基本情報'],
     ['progress','進捗・要確認','予定と実績を図解で確認'],
     ['reports','帳票・印刷','現場で共有する工程の一覧'],
@@ -117,7 +117,7 @@
     ).join(''):'<div class="empty-today">本日着手する未完了の工程はありません。次に始まる工程を確認できます。</div>';
     const title=$('.today-hero h1');if(title)title.textContent='今日の予定';
     const section=$('.today-primary .card-heading strong');if(section)section.textContent='今日やること（優先順）';
-    $('.today-primary .text-button')?.setAttribute('data-ws-action','priority');
+    const action=$('.today-primary .text-button');if(action){action.removeAttribute('data-go');action.dataset.wsAction='priority';action.textContent='優先順位で見る ↗';}
     const intro=$('.field-principle');if(intro){const st=intro.querySelector('strong');if(st)st.textContent='「今日の予定」から、必要な作業だけ確認';}
   }
   function renderPriority(){
@@ -242,7 +242,7 @@
     if(action==='csv'){exportCSV();return;}
     if(action==='backup'){exportJSON();return;}
     if(action==='help'){$('#helpDialog')?.showModal();return;}
-    if(action==='reset'){$('#reset')?.click();}
+    if(action==='reset'&&confirm('この端末の工程をサンプルに戻しますか？ 現在の編集内容は失われます。')){$('#reset')?.click();}
   }
   function bindEvents(){
     $('#mainContent').addEventListener('click',(e)=>{
