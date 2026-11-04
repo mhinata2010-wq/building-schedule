@@ -186,3 +186,16 @@ body[data-current-view]:not([data-current-view="gantt"]) .commandbar{display:non
 #miniWindow::after{right:8px}
 #miniMap.dragging #miniWindow{background:rgba(37,99,235,.22);border-color:#1553c8}
 @media(max-width:650px){.overview-bar{height:80px}.overview-bar .mini-hint{font-size:9px;line-height:1.4}.mini-map{height:42px}}
+
+/* Explicit network zoom: avoids accidental pinch zoom while editing tasks. */
+.network-zoom-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:7px;padding:10px 13px;background:#fff;border:1px solid #dfe8e1;border-top:0}
+.network-zoom-toolbar button{min-height:42px;min-width:44px;padding:8px 12px;border:1px solid #d9e3dc;border-radius:9px;background:#fff;color:#234b35;font-size:17px;font-weight:750;cursor:pointer}
+.network-zoom-toolbar button:last-child{font-size:12px;min-width:80px}
+.network-zoom-toolbar button:hover{background:#f0f6f2}
+.network-zoom-toolbar button:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+.network-zoom-toolbar button[disabled]{opacity:.35;cursor:not-allowed}
+.network-zoom-toolbar button[aria-pressed="true"]{border-color:#2563eb;background:#eff5ff;color:#1d4ed8}
+.network-zoom-toolbar output{min-width:53px;text-align:center;font-size:13px;font-weight:750;color:#294b37;font-variant-numeric:tabular-nums}
+#network .network-wrap{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+#networkSvg{max-width:none;transform:none;transform-origin:top left}
+@media(max-width:700px){.network-zoom-toolbar{justify-content:center;gap:8px;padding:8px}.network-zoom-toolbar button{min-height:44px;min-width:44px}}
