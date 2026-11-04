@@ -38,3 +38,9 @@
 
 ## Next
 次フェーズは、LocalStorage中心のPrototypeから、認証・Realtime DB・複数人共同編集・写真/日報を持つ実運用基盤へ移行します。
+
+## Sidebar UI (2026-11-04)
+- 横タブから常設の左サイドバーへ変更。モバイルは開閉メニュー。
+- 今日の工程、進行中、次工程を動的に表示。
+- 工程表、前後関係、進捗更新、要確認、印刷に既存データからアクセス。
+- 新機能の設計と検証範囲: [docs/SIDEBAR_DASHBOARD.md](docs/SIDEBAR_DASHBOARD.md)
