@@ -22,7 +22,7 @@ export function createCloudScheduleRepository(supabase) {
     if (!document || typeof document !== 'object' || !Array.isArray(document.tasks)) {
       throw new TypeError('Expected schedule document containing a tasks array.');
     }
-    return structuredClone(document);
+    return JSON.parse(JSON.stringify(document));
   }
 
   // Postgres JSONB does not preserve object key insertion order.
