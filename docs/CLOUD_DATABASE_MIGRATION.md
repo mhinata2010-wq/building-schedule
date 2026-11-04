@@ -43,3 +43,15 @@ DBプロジェクトのURLとpublishable key、Authの設定、デプロイ済�
 - 既存の工程作成・移動・削除・依存関係の機能が壊れていない
 
 参考： https://supabase.com/docs/guides/database/postgres/row-level-security 、 https://supabase.com/docs/reference/javascript/auth-signinwithotp
+
+
+## Firebaseへの保存（追加要件）
+ユーザー要望により、Supabaseに加えてFirebase Cloud Firestoreにもデータを複製する。ただし両方へブラウザから個別に書き込まず、`Supabase → 非公開Outbox → サーバーWorker → Firestore` とする。
+
+- 実装：[`docs/FIREBASE_MIRROR_ARCHITECTURE.md`](FIREBASE_MIRROR_ARCHITECTURE.md)
+- SQL：`database/firebase-outbox.sql`
+- Firebase側のSecurity Rules：`firebase/firestore.rules`（ブラウザからの読み書きは全拒否）
+- サーバーWorker：`cloud/firebase-mirror/`
+- データ削除の伝播、本番実接続、監視、課金・セキュリティレビューが未実施のため、**本番DB切り替えはまだできない**。
+
+Firebase側も未接続。管理画面でFirebaseへの保存が成功しているかのように表示してはならない。
