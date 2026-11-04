@@ -25,6 +25,15 @@ export function createCloudScheduleRepository(supabase) {
     return structuredClone(document);
   }
 
+  // Postgres JSONB does not preserve object key insertion order.
+  function normalizeJSON(value) {
+    if (Array.isArray(value)) return value.map(normalizeJSON);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(Object.keys(value).sort().map(key => [key, normalizeJSON(value[key])]));
+    }
+    return value;
+  }
+
   async function load() {
     const user = await currentUser();
     const { data, error } = await supabase
@@ -87,7 +96,7 @@ export function createCloudScheduleRepository(supabase) {
     const result = await save(safeDocument, current.revision);
     const verify = await load();
     if (!verify || verify.revision !== result.revision ||
-        JSON.stringify(verify.document) !== JSON.stringify(safeDocument)) {
+        JSON.stringify(normalizeJSON(verify.document)) !== JSON.stringify(normalizeJSON(safeDocument))) {
       throw new Error('Import verification failed. Keep device backup and retry.');
     }
     return { imported: true, revision: result.revision, document: verify.document };
