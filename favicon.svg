@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+<title>Building Schedule icon</title>
+<rect width="64" height="64" rx="13" fill="#155b48"/>
+<path d="M14 15h23c9 0 14 5 14 12 0 5-3 9-7 11 5 2 7 6 7 10 0 8-6 13-15 13H14V15zm10 10v10h11c4 0 6-2 6-5s-2-5-6-5H24zm0 19v8h12c4 0 6-1 6-4s-2-4-6-4H24z" fill="#fff" transform="translate(0 -5) scale(.9 .9) translate(3 4)"/>
+<path d="M52 17h-7" stroke="#f27b4b" stroke-width="4" stroke-linecap="round"/>
+</svg>
