@@ -1,0 +1,40 @@
+name: Full workspace design integration
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'field-workspace.js'
+      - 'priority-visual-hierarchy.css'
+      - 'kanna-workspace.css'
+      - 'kanna-workspace.js'
+      - 'tests/kanna-full-workspace.test.mjs'
+      - '.github/workflows/kanna-full-workspace.yml'
+  push:
+    branches:
+      - 'feature/kanna-inspired-full-workspace'
+    paths:
+      - 'index.html'
+      - 'field-workspace.js'
+      - 'priority-visual-hierarchy.css'
+      - 'kanna-workspace.css'
+      - 'kanna-workspace.js'
+      - 'tests/kanna-full-workspace.test.mjs'
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check app.js
+          node --check field-workspace.js
+          node --check kanna-workspace.js
+          node --check tests/kanna-full-workspace.test.mjs
+      - name: Verify preservation of all modules, routes and UI controls
+        run: node --test tests/kanna-full-workspace.test.mjs
