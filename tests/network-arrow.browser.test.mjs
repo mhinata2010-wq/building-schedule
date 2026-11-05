@@ -61,7 +61,7 @@ try{
     assert.ok(e.gap>=13&&e.gap<=17,'Arrow must have clearance before card, got '+e.gap);
     assert.ok(e.marker.includes('netArrow'),'Arrow marker lost after CSS');
   }
-  const sidebar=await page.locator('.sidebar-chevron').evaluate(el=>{
+  const sidebar=await page.locator('.sidebar-chevron').first().evaluate(el=>{
     const r=el.getBoundingClientRect();
     return {width:r.width,height:r.height,flex:getComputedStyle(el).flexShrink};
   });
