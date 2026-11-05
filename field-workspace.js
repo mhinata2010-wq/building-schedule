@@ -194,6 +194,7 @@
   }
   function renderPages(){
     renderPriority();renderProgress();renderProjects();renderReports();renderSettings();renderTodayPriority();updateProjectNames();
+    document.dispatchEvent(new Event('building-schedule:render'));
   }
   function download(filename,content,type){
     const blob=new Blob([content],{type:type||'application/octet-stream'});
