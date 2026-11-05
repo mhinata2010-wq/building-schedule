@@ -111,6 +111,11 @@ test('honest infrastructure messaging, no fake public share links', () => {
   assert.doesNotMatch(themeJs, /https:\/\/[^"'\s]+\/share\//, 'Never claim a functional share URL');
 });
 
+test('the built-in app icon resolves locally rather than emitting a 404', () => {
+  assert.match(html, /<link rel="icon"[^>]*href="favicon.svg"/);
+  assert.ok(existsSync(join(root, 'favicon.svg')));
+});
+
 test('no KANNA-specific logo, remote artwork or code copied into the app', () => {
   assert.doesNotMatch(theme, /url\(["']?https?:\/\/[^)]/);
   assert.doesNotMatch(themeJs, /<img\b|https?:\/\/(?:lp\.kanna4u\.com|aldagram\.com)/);
