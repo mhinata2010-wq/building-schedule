@@ -6,6 +6,8 @@ on:
       - 'field-workspace.js'
       - 'priority-visual-hierarchy.css'
       - 'kanna-workspace.css'
+      - 'kanna-product-fidelity.css'
+      - 'kanna-product-fidelity.js'
       - 'kanna-workspace.js'
       - 'tests/kanna-full-workspace.test.mjs'
       - 'tests/kanna-workspace.browser.test.mjs'
@@ -19,6 +21,8 @@ on:
       - 'field-workspace.js'
       - 'priority-visual-hierarchy.css'
       - 'kanna-workspace.css'
+      - 'kanna-product-fidelity.css'
+      - 'kanna-product-fidelity.js'
       - 'kanna-workspace.js'
       - 'tests/kanna-full-workspace.test.mjs'
 jobs:
