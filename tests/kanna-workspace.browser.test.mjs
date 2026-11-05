@@ -54,11 +54,25 @@ try {
   await page.locator('#todayView .bs-project-overview').waitFor();
   assert.ok((await page.locator('#bsOverviewTitle').innerText()).length > 0);
   assert.match(await page.locator('#bsOverviewStatus').innerText(), /端末/);
+  const railWidth = await page.locator('#appSidebar').evaluate(el => Math.round(el.getBoundingClientRect().width));
+  assert.ok(railWidth >= 65 && railWidth <= 72, 'Desktop icon rail must be approximately 68px, got ' + railWidth);
+  assert.ok(await page.locator('.bs-breadcrumbs').isVisible(), 'Page breadcrumb missing');
+  const overviewBackground = await page.locator('.bs-project-overview').evaluate(el => getComputedStyle(el).backgroundColor);
+  assert.equal(overviewBackground, 'rgb(255, 255, 255)', 'Marketing-green hero should be removed');
+
 
   await goTo(page, 'gantt');
   assert.ok(await page.locator('#scheduleViewport').isVisible());
   assert.ok(await page.locator('#miniMap').isVisible());
   assert.ok(await page.locator('#addRow').isVisible());
+  await page.screenshot({path:output+'/gantt-desktop.png',fullPage:true});
+  const ganttBar = page.locator('.bar').first();
+  if (await ganttBar.count()) {
+    const barColor = await ganttBar.evaluate(el => getComputedStyle(el).backgroundColor);
+    assert.equal(barColor, 'rgb(113, 189, 148)', 'Gantt bar must use mint green in product layout');
+  }
+  assert.match(await page.locator('.bs-breadcrumbs').innerText(), /工程表/);
+
 
   await goTo(page, 'network');
   assert.ok(await page.locator('#networkSvg').isVisible());
@@ -66,6 +80,7 @@ try {
   await goTo(page, 'priority');
   const rows = page.locator('#priorityView .ws-task-row');
   assert.ok(await rows.count() > 0, 'Tasks should still render');
+  await page.screenshot({path:output+'/priority-desktop.png',fullPage:true});
   const prioritySelect = page.locator('#priorityView select[data-priority]').first();
   if (await prioritySelect.count()) {
     await prioritySelect.selectOption('1');
@@ -105,6 +120,8 @@ try {
   await m.locator('#mobileMenu').click();
   assert.ok(await m.locator('#appSidebar').evaluate(el => el.classList.contains('open')),
     'Mobile sidebar did not open');
+  const mobileLabel = await m.locator('.sidebar-nav [data-screen="priority"] span').first().evaluate(el => getComputedStyle(el).opacity);
+  assert.equal(mobileLabel, '1', 'Mobile full-size navigation must show labels');
   await m.locator('.sidebar-nav [data-screen="priority"]').click();
   await m.locator('#priorityView').waitFor();
   assert.ok(await m.locator('#priorityView').isVisible(), 'Priority view is not mobile navigable');
