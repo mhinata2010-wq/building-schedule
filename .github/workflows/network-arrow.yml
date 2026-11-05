@@ -5,6 +5,7 @@ on:
       - 'fix/network-arrow-geometry'
     paths:
       - 'sketch-network.js'
+      - 'field-workspace.js'
       - 'field-workspace.css'
       - 'sidebar-dashboard.css'
       - 'index.html'
@@ -14,6 +15,7 @@ on:
   pull_request:
     paths:
       - 'sketch-network.js'
+      - 'field-workspace.js'
       - 'field-workspace.css'
       - 'sidebar-dashboard.css'
       - 'index.html'
@@ -34,6 +36,7 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check sketch-network.js
+          node --check field-workspace.js
           node --check tests/network-arrow.browser.test.mjs
       - name: Verify arrow rendering source contracts
         run: node --test tests/network-arrow.test.mjs
