@@ -48,6 +48,13 @@ test('sidebar chevron has its own SVG viewport and cannot flex-shrink', () => {
   assert.match(side, /\.sidebar-chevron\{[^}]*stroke:currentColor/);
 });
 
+test('page navigation generates real SVG chevrons after its DOM rebuild', () => {
+  const workspace = read('field-workspace.js');
+  assert.match(workspace, /document\.createElementNS\('http:\/\/www\.w3\.org\/2000\/svg','svg'\)/);
+  assert.match(workspace, /clone\.append\(chevron\)/);
+  assert.match(workspace, /chevron\.setAttribute\('viewBox','0 0 24 24'\)/);
+});
+
 test('fresh scripts and styles load via versioned URLs', () => {
   for (const filename of ['sketch-network.js','sidebar-dashboard.css','field-workspace.css']) {
     assert.ok(html.includes(filename+'?v=20261105-arrowhead-fix-1'), filename);
