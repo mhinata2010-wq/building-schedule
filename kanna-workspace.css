@@ -15,7 +15,7 @@
   --bs-canvas:#f7f9f7;
   --bs-border:#dae5de;
   --bs-ink:#162721;
-  --bs-muted:#72847c;
+  --bs-muted:#587064;
   --bs-radius:10px;
   --bs-motion:180ms;
   --forest:var(--brand);
@@ -53,8 +53,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   box-shadow:none;
 }
 .sidebar-brand strong{font-size:14px;letter-spacing:-.035em;color:var(--brand-strong);}
-.sidebar-brand small{color:#71887a;font-size:10px;letter-spacing:0;}
-.workspace-nav-title{color:#8a9b91!important;font-size:10px;font-weight:800;letter-spacing:.12em;margin:20px 15px 8px;}
+.sidebar-brand small{color:#526a5c;font-size:10px;letter-spacing:0;}
+.workspace-nav-title{color:#587064!important;font-size:10px;font-weight:800;letter-spacing:.12em;margin:20px 15px 8px;}
 .sidebar-divider{background:var(--bs-border);margin:15px 10px;}
 .sidebar-nav{gap:3px;}
 .sidebar-nav .mode,.sidebar-nav .sidebar-link{
@@ -80,9 +80,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .sidebar-nav .mode:hover .ui-icon,.sidebar-nav .sidebar-link:hover .ui-icon{color:var(--brand-mid);}
 .sidebar-nav .mode .ui-icon,.sidebar-nav .sidebar-link .ui-icon{width:19px;height:19px;stroke-width:1.8;}
 .sidebar-chevron{color:var(--brand-mid);}
-.sidebar-foot{border-top:1px solid var(--bs-border);color:#82968a;padding:18px 10px 0;}
+.sidebar-foot{border-top:1px solid var(--bs-border);color:#557264;padding:18px 10px 0;}
 .sidebar-foot span{color:#577569;letter-spacing:.13em;font-size:9px;}
-.sidebar-foot small{color:#82968a;font-size:10px;}
+.sidebar-foot small{color:#557264;font-size:10px;}
 .main-column{background:var(--bs-canvas);}
 .topbar{
   position:sticky;top:0;height:76px;z-index:60;
@@ -90,7 +90,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   padding-inline:30px;box-shadow:none;backdrop-filter:blur(6px);
 }
 .project-title strong{color:var(--brand-strong);font-size:17px;letter-spacing:-.025em;}
-.project-title>span{color:#81988b;font-weight:800;font-size:9px;letter-spacing:.13em;}
+.project-title>span{color:#587064;font-weight:800;font-size:9px;letter-spacing:.13em;}
 .save-state{color:#597266;font-size:11px;}
 .save-state i{background:var(--brand-mid)!important;}
 .top-actions .ghost{border-color:#d7e4da;background:#fff;color:var(--brand-strong);}
@@ -167,11 +167,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 /* KANNA-inspired accent system: create action uses warm contrasting CTA,
    information stays green, progress remains blue to separate functions. */
 .primary,.ws-button-main,#addRow,.quick-update-fab{
-  background:var(--brand-cta);color:#203b30;border:1px solid #e9764b;
+  background:var(--brand-cta);color:#173629;border:1px solid #e9764b;
   box-shadow:none;border-radius:7px;font-weight:850;
 }
 .primary:hover,.ws-button-main:hover,#addRow:hover,.quick-update-fab:hover{
-  background:var(--brand-cta-hover);border-color:var(--brand-cta-hover);color:#203b30;
+  background:var(--brand-cta-hover);border-color:var(--brand-cta-hover);color:#173629;
 }
 .primary:active,.ws-button-main:active,#addRow:active{transform:translateY(1px);}
 #fit,.tool{font-size:12px;}
