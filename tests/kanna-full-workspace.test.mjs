@@ -116,6 +116,23 @@ test('the built-in app icon resolves locally rather than emitting a 404', () => 
   assert.ok(existsSync(join(root, 'favicon.svg')));
 });
 
+test('product layout has an icon rail, compact dashboard and matching JS navigation', () => {
+  assert.ok(existsSync(join(root, 'kanna-product-fidelity.css')));
+  assert.ok(existsSync(join(root, 'kanna-product-fidelity.js')));
+  assert.match(html, /kanna-product-fidelity\.css/);
+  assert.match(html, /kanna-product-fidelity\.js/);
+  const productCSS = text('kanna-product-fidelity.css');
+  const productJS = text('kanna-product-fidelity.js');
+  assert.match(productCSS, /grid-template-columns:68px minmax\(0,1fr\)/);
+  assert.match(productCSS, /\.app-sidebar\s*\{/);
+  assert.match(productCSS, /\.bs-project-overview\s*\{/);
+  assert.match(productCSS, /\.bar\s*\{/);
+  assert.match(productJS, /data-nav-label|navLabel/);
+  assert.match(productJS, /bs-breadcrumbs/);
+  assert.match(productJS, /bs-progress-table/);
+  assert.doesNotThrow(() => new Script(productJS));
+});
+
 test('no KANNA-specific logo, remote artwork or code copied into the app', () => {
   assert.doesNotMatch(theme, /url\(["']?https?:\/\/[^)]/);
   assert.doesNotMatch(themeJs, /<img\b|https?:\/\/(?:lp\.kanna4u\.com|aldagram\.com)/);
