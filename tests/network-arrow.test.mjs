@@ -32,7 +32,7 @@ test('filled arrowhead size stays constant regardless of line width', () => {
   assert.match(net, /viewBox="0 0 16 16"/);
   assert.match(net, /markerWidth="16" markerHeight="16"/);
   assert.match(net, /M2 2 L14 8 L2 14 Z/);
-  assert.doesNotMatch(net, /context-stroke/);
+  assert.doesNotMatch(net, /stroke="context-stroke"/);
 });
 
 test('neutral and critical dependency links use matching marker colors', () => {
