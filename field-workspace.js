@@ -66,6 +66,19 @@
       clone.removeAttribute('data-target-view');
       clone.dataset.screen=dest;
       const label=clone.querySelector('span');if(label)label.textContent=entry[1];
+      // The original "工程表" entry containing a chevron is removed above.
+      // Give the actual rendered page links a stable SVG arrow, never a glyph.
+      if(!clone.querySelector('.sidebar-chevron')){
+        const chevron=document.createElementNS('http://www.w3.org/2000/svg','svg');
+        chevron.setAttribute('class','sidebar-chevron');
+        chevron.setAttribute('viewBox','0 0 24 24');
+        chevron.setAttribute('aria-hidden','true');
+        chevron.setAttribute('focusable','false');
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d','m9 5 7 7-7 7');
+        chevron.append(path);
+        clone.append(chevron);
+      }
       b.replaceWith(clone);
       clone.addEventListener('click',()=>go(dest));
     });
