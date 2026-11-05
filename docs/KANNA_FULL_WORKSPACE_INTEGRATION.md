@@ -46,16 +46,16 @@
 - 閲覧専用QR共有URL、期限、共有停止、既読確認
 - 協力会社・施主のロール別アクセス権限
 - Excel XLSXの取り込み、A3印刷に合わせた完全なページ分割
-- Safari / Chrome実ブラウザ、実機、スクリーンリーダーでのE2E検証
+- iPhone Safari / Android Chrome実機、スクリーンリーダーでのE2E検証（Chrome HeadlessのPC・モバイルエミュレーションは合格）
 
 これらはPR #30など別の設計・インフラ作業で進める。**QRコードを単に公開サイトURLへ向けても端末内の工程データは共有できない**ので、現時点で実装済みとは表示しない。
 
 ## レビュー / リリース判定
 1. CIで既存ID・JSモジュール・画面切替・タスク更新属性・CSSリンクが残ることを検査
-2. デスクトップ（1366px・1024px）・モバイル（390px・360px）でスクリーンショット比較
-3. 主要操作：ドラッグ作成、依存関係の確認とキャンセル、工程削除、日程変更、ネットワーク拡大、進捗更新、印刷、JSONインポートをE2E検証
+2. デスクトップ・モバイルブラウザでの表示確認（1440px / 390pxのHeadless Chromeテストは合格。1366px・1024px・360pxは未確認）
+3. 主要操作：ページ遷移、優先度変更、現場名更新、進捗画面、帳票、設定はChromeで確認済み。ドラッグ作成、依存関係の確認とキャンセル、工程削除、日程変更、ネットワーク拡大、印刷、JSONインポートはE2E未確認
 4. プロジェクト名と進捗を更新し、TODAY上部のサマリーが追従することを確認
-5. 他画面やスマホの固定UIが崩れないことを確認
+5. 390pxモバイルのサイドバーメニューからタスク画面への移動を確認済み。その他の実機レイアウトは継続確認
 6. 実機検証前には本番mainへ自動マージしない
 
 ## 参照サイト / 詳細
@@ -64,3 +64,9 @@
 - [design-deta / KANNA-inspired LPの実装・比較](https://github.com/mhinata2010-wq/design-deta/blob/feature/kanna-inspired-marketing-template/kanna-inspired-marketing-template/DESIGN_AUDIT.md)
 - [Building Schedule PR #29 / 優先タスク](https://github.com/mhinata2010-wq/building-schedule/pull/29)
 - [Building Schedule PR #30 / クラウドDB + Firebase（Draft）](https://github.com/mhinata2010-wq/building-schedule/pull/30)
+
+## CI実行結果（2026-11-05）
+
+- [GitHub Actions ブラウザ＋回帰テスト合格](https://github.com/mhinata2010-wq/building-schedule/actions/runs/41945766564)：Headless Chrome（Google Chrome 156）、1440×960/390×844、11件の表示/ナビゲーション等の操作チェック、静的回帰テスト12件。いずれも成功。
+- [デスクトップ・モバイルのスクリーンショット](https://github.com/mhinata2010-wq/building-schedule/actions/runs/41945707736/artifacts/13378825786)（GitHubログインが必要な場合があります）。
+- 実機Safari、タッチでのバー編集、ユーザーによる操作検証は別途必要。
