@@ -28,7 +28,7 @@ try{
   page.on('response',r=>{if(r.status()>=400&&/\.(js|css)(\?|$)/.test(r.url()))errors.push('missing asset '+r.url());});
   await page.goto(url,{waitUntil:'load'});
   await page.locator('.sidebar-nav .mode[data-view="network"]').click();
-  await page.locator('#networkSvg .net-edge').first().waitFor();
+  await page.locator('#networkSvg .net-edge').first().waitFor({state:'attached'});
   const geometry=await page.locator('#networkSvg').evaluate(svg=>{
     const marker=[...svg.querySelectorAll('marker')].map(m=>({
       id:m.id,units:m.getAttribute('markerUnits'),w:m.getAttribute('markerWidth'),h:m.getAttribute('markerHeight'),
@@ -82,7 +82,7 @@ try{
   await m.goto(url,{waitUntil:'load'});
   await m.locator('#mobileMenu').click();
   await m.locator('.sidebar-nav .mode[data-view="network"]').click();
-  await m.locator('#networkSvg .net-edge').first().waitFor();
+  await m.locator('#networkSvg .net-edge').first().waitFor({state:'attached'});
   assert.ok(await m.locator('#network').isVisible());
   await m.locator('#networkZoomFit').click();
   assert.equal(await m.locator('#networkZoomFit').getAttribute('aria-pressed'),'true');
