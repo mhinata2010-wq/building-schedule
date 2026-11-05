@@ -8,6 +8,8 @@ on:
       - 'kanna-workspace.css'
       - 'kanna-workspace.js'
       - 'tests/kanna-full-workspace.test.mjs'
+      - 'tests/kanna-workspace.browser.test.mjs'
+      - 'tests/package.json'
       - '.github/workflows/kanna-full-workspace.yml'
   push:
     branches:
@@ -38,3 +40,25 @@ jobs:
           node --check tests/kanna-full-workspace.test.mjs
       - name: Verify preservation of all modules, routes and UI controls
         run: node --test tests/kanna-full-workspace.test.mjs
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser test dependency
+        run: npm install --prefix tests --no-audit --no-fund
+      - name: Install browser and OS dependencies
+        run: ./tests/node_modules/.bin/playwright install --with-deps chromium
+      - name: Verify original flows across desktop and mobile
+        run: node tests/kanna-workspace.browser.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workspace-design-screenshots
+          path: tests-output/*.png
+          if-no-files-found: ignore
