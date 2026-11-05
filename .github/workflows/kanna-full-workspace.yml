@@ -52,8 +52,15 @@ jobs:
           node-version: '22'
       - name: Install isolated browser test dependency
         run: npm install --prefix tests --no-audit --no-fund
-      - name: Install browser for screenshot and interaction smoke
-        run: ./tests/node_modules/.bin/playwright install chromium
+      - name: Select existing runner Chrome (no external browser download)
+        run: |
+          BROWSER_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$BROWSER_PATH" ]; then
+            echo "No system Chrome binary found on runner"
+            exit 1
+          fi
+          echo "BROWSER_EXECUTABLE=$BROWSER_PATH" >> "$GITHUB_ENV"
+          "$BROWSER_PATH" --version
       - name: Verify original flows across desktop and mobile
         run: node tests/kanna-workspace.browser.test.mjs
       - uses: actions/upload-artifact@v4
