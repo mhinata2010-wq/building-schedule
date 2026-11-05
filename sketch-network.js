@@ -179,7 +179,22 @@
       const p=points.get(t.pred),q=points.get(t.id);
       if(!p||!q)return '';
       const isCritical=chain.has(t.id)&&chain.has(t.pred);
-      return '<path class="net-edge '+(isCritical?'net-critical':'')+'" d="M'+(p.x+211)+' '+(p.y+46)+' C'+(p.x+248)+' '+(p.y+46)+','+(q.x-38)+' '+(q.y+46)+','+q.x+' '+(q.y+46)+'"/>';
+      // Leave a visible clearance before each task card so the arrowhead is
+      // never hidden underneath the node. Keep the final tangent horizontal.
+      const fromX=p.x+211+5, toX=q.x-15;
+      const fromY=p.y+46, toY=q.y+46;
+      if(toX<=fromX+24){
+        // A cycle may produce backward/same-column dependencies. Route them
+        // around the cards rather than compressing the head into a short gap.
+        const outX=Math.max(p.x,q.x)+255;
+        const laneY=Math.max(p.y,q.y)+134;
+        const targetX=q.x+105, targetY=q.y+94+15;
+        return '<path class="net-edge '+(isCritical?'net-critical':'')+'" d="M'+(p.x+216)+' '+fromY+
+          ' L'+outX+' '+fromY+' L'+outX+' '+laneY+' L'+targetX+' '+laneY+' L'+targetX+' '+targetY+'"/>';
+      }
+      const bend=Math.min(31,(toX-fromX)/2.5);
+      return '<path class="net-edge '+(isCritical?'net-critical':'')+'" d="M'+fromX+' '+fromY+
+        ' C'+(fromX+bend)+' '+fromY+','+(toX-bend)+' '+toY+','+toX+' '+toY+'"/>';
     }).join('');
     const nodeMarkup=tasks.map((t,i)=>{
       const p=points.get(t.id),progress=Math.min(100,Math.max(0,Number(t.progress)||0));
@@ -191,7 +206,14 @@
     svg.setAttribute('width',String(width));svg.setAttribute('height',String(height));
     networkNaturalWidth=width;networkNaturalHeight=height;
     applyNetworkZoom(false);
-    svg.innerHTML='<defs><marker id="netArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="context-stroke" stroke-width="1.5"/></marker></defs>'+edgeMarkup+nodeMarkup+(tasks.length?'':'<text x="52" y="75" class="net-title">工程がまだありません。工程を考える画面から追加してください。</text>');
+    // Fixed-size, filled arrowheads (not context-stroke/V-shaped markers).
+    // Two color variants match the normal and critical dependency lines.
+    const markerDef=(id,color)=>'<marker id="'+id+'" markerUnits="userSpaceOnUse" '+
+      'viewBox="0 0 16 16" markerWidth="16" markerHeight="16" refX="14" refY="8" '+
+      'orient="auto" overflow="visible"><path d="M2 2 L14 8 L2 14 Z" fill="'+color+'"/></marker>';
+    svg.innerHTML='<defs>'+markerDef('netArrow','#718e7a')+
+      markerDef('netArrowCritical','#2563eb')+'</defs>'+edgeMarkup+nodeMarkup+
+      (tasks.length?'':'<text x="52" y="75" class="net-title">工程がまだありません。工程を考える画面から追加してください。</text>');
     const legends=$('#networkLegend');
     if(legends)legends.innerHTML='<div><strong>'+tasks.length+'</strong><span>工程</span></div><div><strong>'+links.length+'</strong><span>前後関係</span></div><div><strong>'+totalLongest+'日</strong><span>最長チェーン（工程日数の合計）</span></div><div class="net-legend-note"><i></i>青枠：最長の依存チェーン（工期の正式なCPM計算ではありません）</div>';
     const warning=$('#networkWarning');

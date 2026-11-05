@@ -1,0 +1,11 @@
+{
+  "name": "building-schedule-arrow-smoke",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

@@ -1,0 +1,72 @@
+name: Network arrows and chevrons
+on:
+  push:
+    branches:
+      - 'fix/network-arrow-geometry'
+    paths:
+      - 'sketch-network.js'
+      - 'field-workspace.js'
+      - 'field-workspace.css'
+      - 'sidebar-dashboard.css'
+      - 'index.html'
+      - 'tests/network-arrow*'
+      - 'tests/package.json'
+      - '.github/workflows/network-arrow.yml'
+  pull_request:
+    paths:
+      - 'sketch-network.js'
+      - 'field-workspace.js'
+      - 'field-workspace.css'
+      - 'sidebar-dashboard.css'
+      - 'index.html'
+      - 'tests/network-arrow*'
+      - 'tests/package.json'
+      - '.github/workflows/network-arrow.yml'
+jobs:
+  static-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check sketch-network.js
+          node --check field-workspace.js
+          node --check tests/network-arrow.browser.test.mjs
+      - name: Verify arrow rendering source contracts
+        run: node --test tests/network-arrow.test.mjs
+  browser-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser smoke test dependency
+        run: npm install --prefix tests --no-audit --no-fund
+      - name: Select runner's system Chrome
+        run: |
+          BROWSER_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$BROWSER_PATH" ]; then
+            echo "System Chrome unavailable"
+            exit 1
+          fi
+          echo "BROWSER_EXECUTABLE=$BROWSER_PATH" >> "$GITHUB_ENV"
+          "$BROWSER_PATH" --version
+      - name: Verify SVG markers, geometric clearance, zoom and mobile
+        run: node tests/network-arrow.browser.test.mjs
+      - name: Upload desktop and mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: network-arrow-screenshots
+          path: tests-output/*.png
+          if-no-files-found: ignore

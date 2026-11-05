@@ -145,8 +145,8 @@ body[data-current-view]:not([data-current-view="gantt"]) .commandbar{display:non
 .network-warning[hidden]{display:none!important}
 .network-wrap{min-height:460px;max-height:calc(100vh - 300px);overflow:auto;background-color:#fafcfa;background-image:radial-gradient(#d6e2d8 1px,transparent 1px);background-size:22px 22px}
 #networkSvg{max-width:none;display:block}
-.net-edge{stroke:#a4b9aa;stroke-width:2;fill:none;marker-end:url(#netArrow)}
-.net-edge.net-critical{stroke:#2563eb;stroke-width:2.6}
+.net-edge{stroke:#718e7a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;marker-end:url(#netArrow)}
+.net-edge.net-critical{stroke:#2563eb;stroke-width:2.6;marker-end:url(#netArrowCritical)}
 .net-task{cursor:pointer;outline:none}
 .net-card-bg{fill:#fff;stroke:#d2ded6;stroke-width:1.7;filter:drop-shadow(0 2px 4px rgba(29,57,38,.05))}
 .net-task:hover .net-card-bg,.net-task:focus .net-card-bg{stroke:#359466;stroke-width:2.3}
