@@ -27,7 +27,7 @@ const server = createServer(async (req, res) => {
 });
 await new Promise(ok => server.listen(0, '127.0.0.1', ok));
 const url = 'http://127.0.0.1:' + server.address().port;
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, executablePath: process.env.BROWSER_EXECUTABLE || undefined });
 const contexts = [];
 
 async function goTo(page, view) {
