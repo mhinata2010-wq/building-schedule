@@ -20,7 +20,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #6aba92;outline-offset:3p
 .sidebar-nav .sidebar-link{min-height:43px;font-weight:500}
 .sidebar-nav .ui-icon{width:21px;height:21px}
 .sidebar-divider{height:1px;background:rgba(216,244,226,.25);margin:14px 7px}
-.sidebar-chevron{margin-left:auto;font-size:24px;font-weight:300;color:#bad0c3}
+.sidebar-chevron{margin-left:auto;display:block;flex:0 0 18px;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:#bad0c3}
 .sidebar-foot{margin-top:auto;padding:34px 12px 0;display:grid;gap:8px;color:#90b0a2}
 .sidebar-foot span{letter-spacing:.2em;font-size:10px;font-weight:800}
 .sidebar-foot small{font-size:11px;line-height:1.5}
