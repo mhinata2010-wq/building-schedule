@@ -1,0 +1,75 @@
+name: Full workspace design integration
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'field-workspace.js'
+      - 'priority-visual-hierarchy.css'
+      - 'kanna-workspace.css'
+      - 'kanna-product-fidelity.css'
+      - 'kanna-product-fidelity.js'
+      - 'kanna-workspace.js'
+      - 'tests/kanna-full-workspace.test.mjs'
+      - 'tests/kanna-workspace.browser.test.mjs'
+      - 'tests/package.json'
+      - '.github/workflows/kanna-full-workspace.yml'
+  push:
+    branches:
+      - 'feature/kanna-inspired-full-workspace'
+    paths:
+      - 'index.html'
+      - 'field-workspace.js'
+      - 'priority-visual-hierarchy.css'
+      - 'kanna-workspace.css'
+      - 'kanna-product-fidelity.css'
+      - 'kanna-product-fidelity.js'
+      - 'kanna-workspace.js'
+      - 'tests/kanna-full-workspace.test.mjs'
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check app.js
+          node --check field-workspace.js
+          node --check kanna-workspace.js
+          node --check tests/kanna-full-workspace.test.mjs
+      - name: Verify preservation of all modules, routes and UI controls
+        run: node --test tests/kanna-full-workspace.test.mjs
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser test dependency
+        run: npm install --prefix tests --no-audit --no-fund
+      - name: Select existing runner Chrome (no external browser download)
+        run: |
+          BROWSER_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$BROWSER_PATH" ]; then
+            echo "No system Chrome binary found on runner"
+            exit 1
+          fi
+          echo "BROWSER_EXECUTABLE=$BROWSER_PATH" >> "$GITHUB_ENV"
+          "$BROWSER_PATH" --version
+      - name: Verify original flows across desktop and mobile
+        run: node tests/kanna-workspace.browser.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workspace-design-screenshots
+          path: tests-output/*.png
+          if-no-files-found: ignore

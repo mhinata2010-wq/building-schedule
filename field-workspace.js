@@ -127,12 +127,20 @@
     const overdue=outstanding.filter(t=>t.end<todayKey());
     const top=header('PRIORITY / TASKS','優先タスク','未完了の工程を順位で整理。現場で次に着手する作業が分かります。',
       btn('＋ 工程を描く','gantt','ws-button-main'));
-    const stats='<div class="ws-metrics"><div><span>未完了</span><strong>'+outstanding.length+'</strong><small>工程</small></div><div><span>要確認</span><strong>'+blocked.length+'</strong><small>工程</small></div><div><span>期限超過</span><strong>'+overdue.length+'</strong><small>工程</small></div></div>';
+    // A zero count is informational, not an alert: keep the surface neutral.
+    const metric=(kind,label,value)=>'<div class="ws-metric" data-kind="'+kind+'" data-has-issues="'+(value>0)+'"><span>'+label+'</span><strong>'+value+'</strong><small>工程</small></div>';
+    const stats='<div class="ws-metrics">'+metric('incomplete','未完了',outstanding.length)+metric('blocked','要確認',blocked.length)+metric('overdue','期限超過',overdue.length)+'</div>';
     const controls='<div class="ws-controls"><div class="ws-segment"><button data-order-mode="auto" class="'+(orderMode==='auto'?'selected':'')+'">優先度順</button><button data-order-mode="manual" class="'+(orderMode==='manual'?'selected':'')+'">手動順位</button></div><label class="ws-checkbox"><input type="checkbox" id="showDone" '+(includeDone?'checked':'')+'>完了も表示</label></div>';
     const rows=list.length?list.map((t,i)=>{
-      const done=status(t)==='done',hint=t.end<todayKey()&&!done?'期限超過':taskNote(t);
-      const opts=[1,2,3,4].map(n=>'<option value="'+n+'" '+(n===priority(t)?'selected':'')+'>'+priorityName[n]+'</option>').join('');
-      return '<article class="ws-task-row"><div class="ws-rank">'+String(i+1).padStart(2,'0')+'</div><div class="ws-task-body"><div class="ws-task-head"><button class="ws-task-title" data-ws-open="'+esc(t.id)+'">'+esc(t.name)+'</button>'+pill(hint,status(t)==='blocked'?'alert':t.end<todayKey()&&!done?'warning':'')+'</div><div class="ws-task-sub">'+esc(t.assignee||'担当未設定')+' ・ '+t.start.slice(5)+' 〜 '+t.end.slice(5)+' ・ '+statusName[status(t)]+'</div><div class="ws-task-progress"><span style="width:'+nProgress(t)+'%"></span></div></div><div class="ws-task-actions"><label>重要度<select data-priority="'+esc(t.id)+'">'+opts+'</select></label><button title="1段上に移動" data-move-up="'+esc(t.id)+'">↑</button><button title="1段下に移動" data-move-down="'+esc(t.id)+'">↓</button><button data-progress-step="'+esc(t.id)+'" title="進捗を25%進める">＋25%</button></div></article>';
+      const done=status(t)==='done';
+      const level=priority(t);
+      const attention=!done?(status(t)==='blocked'?'blocked':t.end<todayKey()?'overdue':'none'):'none';
+      const hint=attention==='overdue'?'期限超過':taskNote(t);
+      const opts=[1,2,3,4].map(n=>'<option value="'+n+'" '+(n===level?'selected':'')+'>'+priorityName[n]+'</option>').join('');
+      // Emphasis follows task.priority, never the 01/02 display position.
+      const importanceTag=!done&&level<=2?'<span class="ws-importance-tag" data-level="'+level+'">'+priorityName[level]+'</span>':'';
+      const progress=nProgress(t);
+      return '<article class="ws-task-row" data-priority-level="'+level+'" data-completed="'+done+'" data-attention="'+attention+'"><div class="ws-rank">'+String(i+1).padStart(2,'0')+'</div><div class="ws-task-body"><div class="ws-task-head"><button class="ws-task-title" data-ws-open="'+esc(t.id)+'">'+esc(t.name)+'</button>'+importanceTag+pill(hint,attention==='blocked'?'alert':attention==='overdue'?'warning':'')+'</div><div class="ws-task-sub">'+esc(t.assignee||'担当未設定')+' ・ '+t.start.slice(5)+' 〜 '+t.end.slice(5)+' ・ '+statusName[status(t)]+'</div><div class="ws-task-progress" role="progressbar" aria-label="'+esc(t.name)+'の進捗" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress+'"><span style="width:'+progress+'%"></span></div></div><div class="ws-task-actions"><label>重要度<select data-priority="'+esc(t.id)+'">'+opts+'</select></label><button title="1段上に移動" data-move-up="'+esc(t.id)+'">↑</button><button title="1段下に移動" data-move-down="'+esc(t.id)+'">↓</button><button data-progress-step="'+esc(t.id)+'" title="進捗を25%進める">＋25%</button></div></article>';
     }).join(''):'<div class="ws-empty">表示する工程はありません。「工程を考える」で工程を追加してください。</div>';
     $('#priorityView').innerHTML=top+stats+'<div class="ws-panel"><div class="ws-panel-head"><h2>やるべき順番</h2><span>↑↓で順番を手動変更できます</span></div>'+controls+'<div class="ws-task-table">'+rows+'</div></div>';
   }
@@ -186,6 +194,7 @@
   }
   function renderPages(){
     renderPriority();renderProgress();renderProjects();renderReports();renderSettings();renderTodayPriority();updateProjectNames();
+    document.dispatchEvent(new Event('building-schedule:render'));
   }
   function download(filename,content,type){
     const blob=new Blob([content],{type:type||'application/octet-stream'});

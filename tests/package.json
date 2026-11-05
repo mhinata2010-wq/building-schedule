@@ -1,0 +1,10 @@
+{
+  "name": "building-schedule-browser-smoke",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser regression smoke tests for visual redesign; no runtime dependency in production",
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
