@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="field-quick-update.css?v=20261104-sidebar">
 <link rel="stylesheet" href="field-offline.css?v=20261104-sidebar">
 <link rel="stylesheet" href="sidebar-dashboard.css?v=20261106-project-home">
-<link rel="stylesheet" href="field-workspace.css?v=20261106-project-home">
+<link rel="stylesheet" href="field-workspace.css?v=20261106-edit-links">
 </head>
 <body data-current-view="projects">
 <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -70,13 +70,13 @@
     <div class="project-dialog-actions"><button class="ws-button ws-button-main" type="submit">作成して開く</button></div>
   </form>
 </dialog>
-<aside id="inspector" class="inspector" aria-hidden="true"><div class="inspector-head"><div><span>工程の詳細</span><h2 id="inspectorTitle">工程</h2></div><button id="closeInspector" aria-label="閉じる">×</button></div><label>工程名<input id="taskName"></label><div class="two"><label>開始日<input id="taskStart" type="date"></label><label>終了日<input id="taskEnd" type="date"></label></div><button id="saveTaskDates" type="button" class="save-task-dates">日程を確定する</button><label>前工程<select id="taskPred"><option value="">なし</option></select></label><p class="hint">日程変更は「日程を確定する」で保存します。後続工程に影響があれば、その場で確認します。</p><button id="deleteTask" class="danger">工程を削除</button></aside>
+<aside id="inspector" class="inspector" aria-hidden="true"><div class="inspector-head"><div><span>工程の詳細</span><h2 id="inspectorTitle">工程</h2></div><button id="closeInspector" aria-label="閉じる">×</button></div><label>工程名<input id="taskName"></label><div class="two"><label>開始日<input id="taskStart" type="date"></label><label>終了日<input id="taskEnd" type="date"></label></div><button id="saveTaskDates" type="button" class="save-task-dates">日程を確定する</button><label>前工程<select id="taskPred"><option value="">なし</option></select></label><button id="unlinkPredecessor" class="ws-button" type="button" hidden>前工程との接続を外す</button><p class="hint">日程変更は「日程を確定する」で保存します。後続工程に影響があれば、その場で確認します。</p><button id="deleteTask" class="danger">工程を削除</button></aside>
 <dialog id="helpDialog" class="help-dialog"><div class="help-head"><h2>Building Schedule の使い方</h2><button id="closeHelp" aria-label="ヘルプを閉じる"><svg class="ui-icon"><use href="#i-close"/></svg></button></div><ol><li>「プロジェクト」で現場を開き、「今日」で作業と要確認事項を見る。</li><li>「工程表」で空白をドラッグし、工程を追加する。</li><li>バーを動かして日付を編集、端を伸ばして期間を変更する。</li><li>「前後関係」で依存関係を確認する。</li><li>「タスク管理」から進捗率と要確認を更新する。</li></ol><p>データは現在、この端末のブラウザ内に保存されます。別端末への同期・共有には対応していません。</p></dialog>
 <script src="app.js?v=20261106-project-home"></script>
 <script src="schedule-dependencies.js?v=20261104-linked-schedule-1"></script>
 <script src="field-runtime.js?v=20261106-project-home"></script>
 <script src="sidebar-dashboard.js?v=20261106-project-home"></script>
-<script src="sketch-network.js?v=20261104-network-zoom-1"></script>
+<script src="sketch-network.js?v=20261106-edit-links"></script>
 <script src="field-workspace.js?v=20261106-project-home"></script>
 </body>
 </html>

@@ -107,7 +107,7 @@
   const net=$('#network');
   if(net){
     const head=net.querySelector('.network-head');
-    if(head)head.innerHTML='<div><strong>ネットワーク工程表</strong><span>工程の前後関係を自動図解。ノードをクリックすると編集できます。</span></div><button class="ws-button" id="networkAddDep">前後関係を編集</button>';
+    if(head)head.innerHTML='<div><strong>ネットワーク工程表</strong><span>矢印を選ぶと、前工程の変更や接続解除ができます。</span></div><button class="ws-button" id="networkAddDep">前後関係を編集</button>';
     const toolbar=document.createElement('div');
     toolbar.className='network-zoom-toolbar';
     toolbar.setAttribute('role','group');
@@ -179,7 +179,11 @@
       const p=points.get(t.pred),q=points.get(t.id);
       if(!p||!q)return '';
       const isCritical=chain.has(t.id)&&chain.has(t.pred);
-      return '<path class="net-edge '+(isCritical?'net-critical':'')+'" d="M'+(p.x+211)+' '+(p.y+46)+' C'+(p.x+248)+' '+(p.y+46)+','+(q.x-38)+' '+(q.y+46)+','+q.x+' '+(q.y+46)+'"/>';
+      const path='M'+(p.x+211)+' '+(p.y+46)+' C'+(p.x+248)+' '+(p.y+46)+','+(q.x-38)+' '+(q.y+46)+','+q.x+' '+(q.y+46);
+      const label=esc(byId.get(t.pred).name+' → '+t.name+'の接続を編集');
+      return '<g class="net-link" role="button" tabindex="0" data-net-link="'+esc(t.id)+'" aria-label="'+label+'">'+
+        '<path class="net-edge '+(isCritical?'net-critical':'')+'" d="'+path+'" aria-hidden="true"/>'+
+        '<path class="net-link-hit" d="'+path+'" aria-hidden="true"/></g>';
     }).join('');
     const nodeMarkup=tasks.map((t,i)=>{
       const p=points.get(t.id),progress=Math.min(100,Math.max(0,Number(t.progress)||0));
@@ -197,8 +201,36 @@
     const warning=$('#networkWarning');
     if(warning){warning.hidden=!cyclic.size;warning.textContent=cyclic.size?'前工程に循環が含まれています。該当する工程の前工程を解除してください。':'';}
   };
-  $('#networkSvg')?.addEventListener('click',e=>{const node=e.target.closest('[data-net-id]');if(node)openInspector(node.dataset.netId);});
-  $('#networkSvg')?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const node=e.target.closest('[data-net-id]');if(node){e.preventDefault();openInspector(node.dataset.netId);}}});
+  const unlink=$('#unlinkPredecessor');
+  const predecessor=$('#taskPred');
+  const originalSyncInspector=syncInspector;
+  syncInspector=()=>{
+    originalSyncInspector();
+    unlink.hidden=!predecessor.value;
+  };
+  unlink.addEventListener('click',()=>{
+    predecessor.value='';
+    predecessor.dispatchEvent(new Event('change'));
+    predecessor.focus();
+  });
+
+  function editNetworkItem(target){
+    const link=target.closest('[data-net-link]');
+    if(link){
+      openInspector(link.dataset.netLink);
+      unlink.focus();
+      return;
+    }
+    const node=target.closest('[data-net-id]');
+    if(node)openInspector(node.dataset.netId);
+  }
+  $('#networkSvg')?.addEventListener('click',e=>editNetworkItem(e.target));
+  $('#networkSvg')?.addEventListener('keydown',e=>{
+    if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-net-link],[data-net-id]')){
+      e.preventDefault();
+      editNetworkItem(e.target);
+    }
+  });
   $('#taskPred')?.addEventListener('change',e=>{
     const t=tasks.find(x=>x.id===selected),next=e.target.value;
     if(!t||!next)return;
