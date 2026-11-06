@@ -1,10 +1,6 @@
 /* Field-first workspace extension. Carefully scoped to existing sidebar dashboard. */
 .view-section[hidden],.workspace-page[hidden]{display:none!important}
 body[data-current-view]:not([data-current-view="gantt"]) .commandbar{display:none!important}
-.workspace-nav-title{font-size:10px;font-weight:750;letter-spacing:.12em;color:#a7b8b0;margin:12px 16px 7px}
-.sidebar-nav .sidebar-link.active{background:rgba(71,138,112,.38);border-color:#ffffff16;color:#fff}
-.sidebar-nav .sidebar-link.active .ui-icon{color:#d6f2e2}
-.sidebar-nav .mode[data-view="network"] span,.sidebar-nav .mode[data-view="gantt"] span{white-space:nowrap}
 .workspace-page{display:grid;align-content:start;gap:18px}
 .workspace-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:24px 3px 8px}
 .workspace-heading h1{font-size:clamp(26px,3vw,36px);font-weight:760;letter-spacing:-.055em;margin:4px 0 6px;color:#142722}
@@ -161,11 +157,9 @@ body[data-current-view]:not([data-current-view="gantt"]) .commandbar{display:non
   body[data-current-view="reports"] .app-shell{display:block!important}
   body[data-current-view="reports"] .main-column{display:block!important}
   body[data-current-view="reports"] .topbar,
-  body[data-current-view="reports"] .app-sidebar,
   body[data-current-view="reports"] .commandbar,
   body[data-current-view="reports"] .workspace-heading,
   body[data-current-view="reports"] .ws-report-toolbar,
-  body[data-current-view="reports"] .sidebar-backdrop,
   body[data-current-view="reports"] .quick-sheet{display:none!important}
   body[data-current-view="reports"] #mainContent>.view-section:not(#reportsView){display:none!important}
   body[data-current-view="reports"] #reportsView{display:block!important}
@@ -215,3 +209,21 @@ body[data-current-view]:not([data-current-view="gantt"]) .commandbar{display:non
   .task-trash{width:32px;height:40px}
   .task-label .detail-button{padding:6px 5px}
 }
+
+.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:16px}
+.project-card{display:flex;flex-direction:column;gap:10px;min-width:0}
+.project-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.project-card-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:#e4f2ea;color:#145642}
+.project-card h2,.project-card p{margin:0;overflow-wrap:anywhere}
+.project-card h2{color:#142722;font-size:19px}
+.project-card p,.project-card dt{color:#53655c;font-size:12px}
+.project-card dl{display:grid;gap:7px;margin:auto 0 2px;padding-top:10px;border-top:1px solid var(--line)}
+.project-card dl div{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:baseline;gap:12px}
+.project-card dd{margin:0;text-align:right;color:#142722;font-size:13px;overflow-wrap:anywhere}
+.project-card-actions,.project-dialog-actions{display:flex;flex-wrap:wrap;gap:8px}
+.project-dialog-actions{justify-content:flex-end}
+.project-dialog form{display:grid;gap:15px}
+.project-dialog label{font-size:13px}
+.project-dialog input{font-size:16px}
+.project-error{margin:0;color:#b42318;font-size:13px}
+.project-error:empty{display:none}
