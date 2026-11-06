@@ -227,3 +227,7 @@ body[data-current-view]:not([data-current-view="gantt"]) .commandbar{display:non
 .project-dialog input{font-size:16px}
 .project-error{margin:0;color:#b42318;font-size:13px}
 .project-error:empty{display:none}
+
+.net-link{cursor:pointer}
+.net-link-hit{fill:none;stroke:transparent;stroke-width:28;pointer-events:stroke;vector-effect:non-scaling-stroke}
+.net-link:hover .net-edge,.net-link:focus-visible .net-edge{stroke:#1769e0;stroke-width:4}
