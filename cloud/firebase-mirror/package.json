@@ -1,0 +1,16 @@
+{
+  "name": "building-schedule-firebase-mirror",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test.mjs",
+    "run": "node worker.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "14.5.0",
+    "pg": "8.23.1"
+  }
+}

@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Supabase is the canonical store. The Firebase mirror is private backup.
+    // Only a trusted server using Firebase Admin credentials may access it.
+    // Server SDK privileges are governed by Google Cloud IAM (bypass rules).
+    match /schedule_mirrors/{supabaseUserId} {
+      allow read, write: if false;
+    }
+    // Do not accidentally expose collections added later.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
