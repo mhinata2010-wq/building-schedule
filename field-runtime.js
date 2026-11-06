@@ -12,7 +12,7 @@ function normalizeTaskMeta(){
     if(!next.assignee){next.assignee='';changed=true}
     return next;
   });
-  if(changed)localStorage.setItem(STORE,JSON.stringify(tasks));
+  if(changed)localStorage.setItem(projectStorageKey(STORE),JSON.stringify(tasks));
 }
 
 function ensureInspectorFields(){
@@ -80,17 +80,6 @@ function bindPanelActions(){document.querySelectorAll('[data-open-task]').forEac
 function renderFieldPanels(){renderToday();renderAttention();renderLookahead();bindPanelActions()}
 render=()=>{baseRender();renderFieldPanels()};
 
-function switchFieldView(name){
-  const today=document.querySelector('#todayView'),gantt=document.querySelector('#gantt'),network=document.querySelector('#network');
-  if(today)today.hidden=name!=='today';if(gantt)gantt.hidden=name!=='gantt';if(network)network.hidden=name!=='network';
-  document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
-  if(name==='network')drawNetwork();
-}
-function bindViewNavigation(){
-  document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>switchFieldView(b.dataset.view));
-  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchFieldView(b.dataset.go));
-}
-
 function ensureQuickUI(){
   if(document.querySelector('#quickUpdateFab'))return;
   const fab=document.createElement('button');fab.id='quickUpdateFab';fab.className='quick-update-fab';fab.textContent='進捗を更新';document.body.append(fab);
@@ -112,5 +101,5 @@ function ensureConnectionState(){
   window.addEventListener('online',update);window.addEventListener('offline',update);update();
 }
 
-normalizeTaskMeta();ensureInspectorFields();ensureQuickUI();ensureConnectionState();bindViewNavigation();renderFieldPanels();switchFieldView('today');
+normalizeTaskMeta();ensureInspectorFields();ensureQuickUI();ensureConnectionState();renderFieldPanels();
 })();

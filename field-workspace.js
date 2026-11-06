@@ -8,19 +8,26 @@
   const statusName = {planned:'予定', 'in-progress':'進行中',blocked:'要確認',done:'完了'};
   const screens = [
     ['priority','タスク管理','やるべき作業を順位順に'],
-    ['projects','現場・プロジェクト','現場と工程の基本情報'],
+    ['projects','プロジェクト','プロジェクト一覧'],
+    ['projectDetail','現場の基本情報','現場と工程の基本情報'],
     ['progress','進捗・要確認','予定と実績を図解で確認'],
     ['reports','帳票・印刷','現場で共有する工程の一覧'],
     ['settings','設定','データの保存と読み込み']
   ];
-  let currentScreen = 'today', orderMode = localStorage.getItem('building-schedule-order-mode')==='manual'?'manual':'auto', includeDone = false, reportType = 'all';
-  let project = loadProject();
-  let ranks = loadRanks();
-  function loadProject(){
-    try { return Object.assign({name:'総合工程表',site:'',owner:'',memo:''},JSON.parse(localStorage.getItem(projectKey)||'{}')); }
-    catch { return {name:'総合工程表',site:'',owner:'',memo:''}; }
+  const orderKey = 'building-schedule-order-mode';
+  const projectDefaults = {name:'総合工程表',site:'',owner:'',memo:''};
+  let orderMode, project, ranks;
+  let includeDone = false, reportType = 'all', centerSchedule = true;
+  function loadProject(id){
+    return {...projectDefaults,...storedJSON(projectStorageKey(projectKey,id),{})};
   }
-  function loadRanks(){ try { const v=JSON.parse(localStorage.getItem(rankKey)||'[]');return Array.isArray(v)?v:[]; } catch {return [];} }
+  function loadProjectSettings(){
+    project=loadProject();
+    ranks=storedJSON(projectStorageKey(rankKey),[]);
+    if(!Array.isArray(ranks))ranks=[];
+    orderMode=localStorage.getItem(projectStorageKey(orderKey))==='manual'?'manual':'auto';
+  }
+  loadProjectSettings();
   function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   function nProgress(t){return Math.min(100,Math.max(0,Number(t.progress)||0));}
   function status(t){return nProgress(t)>=100?'done':(t.status||'planned');}
@@ -50,51 +57,52 @@
   }
   function addPage(id){const s=document.createElement('section');s.id=id+'View';s.className='view-section workspace-page';s.hidden=true;$('#mainContent').append(s);}
   screens.forEach(s=>addPage(s[0]));
-  function initialiseNavigation(){
-    const nav=$('.sidebar-nav');
-    const duplicate=nav.querySelector('.sidebar-link[data-target-view="gantt"]');
-    if(duplicate)duplicate.remove();
-    const modeNames={today:'今日の予定',gantt:'工程を考える',network:'ネットワーク工程表'};
-    document.querySelectorAll('.sidebar-nav .mode').forEach(b=>{const s=b.querySelector('span');if(s)s.textContent=modeNames[b.dataset.view]||s.textContent;});
-    const mappings={quick:'priority',attention:'progress',print:'reports',settings:'settings'};
-    document.querySelectorAll('.sidebar-nav .sidebar-link').forEach(b=>{
-      const dest=b.dataset.targetView==='today'?'projects':mappings[b.dataset.action];
-      if(!dest)return;
-      const entry=screens.find(s=>s[0]===dest);
-      const clone=b.cloneNode(true);
-      clone.removeAttribute('data-action');
-      clone.removeAttribute('data-target-view');
-      clone.dataset.screen=dest;
-      const label=clone.querySelector('span');if(label)label.textContent=entry[1];
-      b.replaceWith(clone);
-      clone.addEventListener('click',()=>go(dest));
-    });
-    document.querySelectorAll('.sidebar-nav .mode').forEach(b=>b.addEventListener('click',()=>{
-      currentScreen=b.dataset.view;
-      screens.forEach(s=>$('#'+s[0]+'View').hidden=true);
-      document.querySelectorAll('[data-screen]').forEach(x=>x.classList.remove('active'));
-      if($('#todayView'))$('#todayView').hidden=b.dataset.view!=='today';
-      document.body.dataset.currentView=b.dataset.view;
-    }));
-    document.querySelectorAll('[data-go],[data-dashboard-go]').forEach(b=>{
-      b.addEventListener('click',()=>setTimeout(()=>{if(b.dataset.go||b.dataset.dashboardGo){const dest=b.dataset.go||b.dataset.dashboardGo;$('.sidebar-nav .mode[data-view="'+dest+'"]')?.click();}},0));
-    });
-    const navStart=document.createElement('div');navStart.className='workspace-nav-title';navStart.textContent='工程を操作';nav.insertBefore(navStart,nav.firstChild);
-    const divider=nav.querySelector('.sidebar-divider');if(divider){const navMore=document.createElement('div');navMore.className='workspace-nav-title';navMore.textContent='現場の管理';divider.after(navMore);}
-    document.querySelectorAll('.sidebar-nav .sidebar-link[data-screen]').forEach(b=>b.setAttribute('aria-label',b.textContent.trim()));
-  }
+  const primaryPages = {today:'todayView',gantt:'gantt',network:'network'};
+  const tabButtons = [...document.querySelectorAll('.bottom-nav [data-view]')];
   function go(view){
-    if(['today','gantt','network'].includes(view)){ $('.sidebar-nav .mode[data-view="'+view+'"]')?.click();return; }
-    const base=$('.sidebar-nav .mode[data-view="today"]');base?.click();
-    currentScreen=view;
-    ['todayView','gantt','network'].forEach(id=>{$('#'+id).hidden=true;});
-    screens.forEach(s=>$('#'+s[0]+'View').hidden=s[0]!==view);
-    document.querySelectorAll('.sidebar-nav .mode').forEach(b=>{b.classList.remove('active');b.removeAttribute('aria-current');});
-    document.querySelectorAll('[data-screen]').forEach(b=>{const active=b.dataset.screen===view;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+    const page = primaryPages[view] || view+'View';
+    if(!document.getElementById(page))return;
     document.body.dataset.currentView=view;
-    $('#sidebarBackdrop')?.click();
+    document.querySelectorAll('#mainContent > .view-section').forEach(section=>{
+      section.hidden=section.id!==page;
+    });
+    const activeView=view==='projectDetail'?'projects':view;
+    tabButtons.forEach(button=>{
+      const active=button.dataset.view===activeView;
+      button.classList.toggle('active',active);
+      if(active)button.setAttribute('aria-current','page');
+      else button.removeAttribute('aria-current');
+      if(active)button.scrollIntoView({block:'nearest',inline:'nearest'});
+    });
+    $('.project-title').hidden=view==='projects';
+    $('.top-actions').hidden=view==='projects';
+    closeInspector();
+    $('#closeQuickSheet')?.click();
     window.scrollTo(0,0);
-    renderPages();
+    if(view==='network')drawNetwork();
+    if(view==='gantt')requestAnimationFrame(()=>{
+      if(document.body.dataset.currentView!=='gantt')return;
+      if(centerSchedule){
+        $('#today').click();
+        centerSchedule=false;
+      }
+      updateMiniWindow();
+    });
+  }
+
+  function openProject(id,view){
+    if(!projectIds().includes(id))return;
+    if(id!==activeProjectId){
+      localStorage.setItem(ACTIVE_PROJECT,id);
+      activeProjectId=id;
+      loadProjectSettings();
+      includeDone=false;
+      reportType='all';
+      centerSchedule=true;
+      closeInspector();
+      load();
+    }
+    go(view);
   }
   function header(kicker,title,description,actions){
     return '<div class="workspace-heading"><div><p class="workspace-kicker">'+kicker+'</p><h1>'+title+'</h1><p>'+description+'</p></div><div class="workspace-header-actions">'+(actions||'')+'</div></div>';
@@ -160,8 +168,53 @@
       '<div class="ws-progress-layout"><section class="ws-panel"><div class="ws-panel-head"><h2>工程ごとの予定と実績</h2><span><i class="ws-key-real"></i>実績　<i class="ws-key-plan"></i>予定</span></div><div class="ws-variance">'+graph+'</div></section><section class="ws-panel"><div class="ws-panel-head"><h2>先に確認すること</h2><span>'+alert.length+'件</span></div><div class="ws-issues">'+issues+'</div></section></div>';
   }
   function renderProjects(){
+    const cards=projectIds().map(id=>{
+      const entry=id===activeProjectId?project:loadProject(id);
+      const saved=id===activeProjectId?tasks:storedJSON(projectStorageKey(STORE,id),[]);
+      const schedule=Array.isArray(saved)?saved:[];
+      const complete=schedule.filter(t=>!pending(t)).length;
+      const name=esc(entry.name);
+      return '<article class="ws-panel project-card">'+
+        '<div class="project-card-top"><span class="project-card-icon"><svg class="ui-icon" aria-hidden="true"><use href="#i-building"/></svg></span>'+
+        (id===activeProjectId?pill('選択中',''):'')+'</div>'+
+        '<h2>'+name+'</h2><p>'+esc(entry.site||'所在地未設定')+'</p>'+
+        '<dl><div><dt>担当</dt><dd>'+esc(entry.owner||'未設定')+'</dd></div>'+
+        '<div><dt>完了した工程</dt><dd>'+complete+' / '+schedule.length+' 件</dd></div></dl>'+
+        '<div class="project-card-actions"><button class="ws-button ws-button-main" data-project-open="'+id+'" aria-label="'+name+'を開く">開く</button>'+
+        '<button class="ws-button" data-project-edit="'+id+'" aria-label="'+name+'の現場情報">現場情報</button></div></article>';
+    }).join('');
+    $('#projectsView').innerHTML=header('WORKSPACE','プロジェクト','管理する現場を選択してください。',btn('＋ 新規プロジェクト','new-project','ws-button-main'))+
+      '<div class="project-grid">'+cards+'</div>';
+  }
+
+  function createProject(event){
+    event.preventDefault();
+    const form=event.currentTarget;
+    const fields=new FormData(form);
+    const name=fields.get('name').trim();
+    const error=$('#projectError');
+    if(!name){
+      error.textContent='プロジェクト名を入力してください。';
+      form.elements.name.focus();
+      return;
+    }
+    const id=crypto.randomUUID();
+    try{
+      const nextProject={...projectDefaults,name,site:fields.get('site').trim(),owner:fields.get('owner').trim()};
+      localStorage.setItem(projectStorageKey(projectKey,id),JSON.stringify(nextProject));
+      localStorage.setItem(PROJECT_IDS,JSON.stringify([...projectIds().slice(1),id]));
+    }catch{
+      localStorage.removeItem(projectStorageKey(projectKey,id));
+      error.textContent='保存できませんでした。ブラウザの保存容量を確認してください。';
+      return;
+    }
+    $('#newProjectDialog').close();
+    openProject(id,'today');
+    $('.bottom-nav [data-view="today"]').focus();
+  }
+  function renderProjectDetail(){
     const active=tasks.filter(pending).length,completed=tasks.length-active;
-    $('#projectsView').innerHTML=header('PROJECT / FIELD','現場・プロジェクト','この試作版は1現場です。現場名を変更すると全ページに反映されます。',btn('工程を考える','gantt','ws-button-main'))+
+    $('#projectDetailView').innerHTML=header('PROJECT / FIELD','現場の基本情報','名称・所在地・担当責任者を編集できます。',btn('一覧に戻る','projects')+btn('工程表を開く','gantt','ws-button-main'))+
       '<div class="ws-progress-layout"><section class="ws-panel ws-project-detail"><div class="ws-panel-head"><h2>現場の基本情報</h2><span>この端末に保存</span></div><label>プロジェクト名<input data-project-field="name" value="'+esc(project.name)+'" maxlength="80"></label><label>現場所在地<input data-project-field="site" value="'+esc(project.site)+'" placeholder="例：徳島県神山町" maxlength="150"></label><label>担当責任者<input data-project-field="owner" value="'+esc(project.owner)+'" placeholder="例：現場責任者" maxlength="100"></label><label>補足メモ<textarea data-project-field="memo" maxlength="2000" rows="4" placeholder="協力会社や現場の注意事項">'+esc(project.memo)+'</textarea></label><p class="ws-muted">編集後、入力欄を離すと保存されます。共同編集には対応していません。</p></section>'+
       '<section class="ws-panel"><div class="ws-panel-head"><h2>工程の概要</h2><span>現在のプロジェクト</span></div><div class="ws-project-stats"><div><strong>'+tasks.length+'</strong><span>登録工程</span></div><div><strong>'+active+'</strong><span>未完了</span></div><div><strong>'+completed+'</strong><span>完了</span></div></div></section></div>';
   }
@@ -185,7 +238,7 @@
     const dashboard=$('.dashboard-project strong');if(dashboard)dashboard.textContent=project.name;
   }
   function renderPages(){
-    renderPriority();renderProgress();renderProjects();renderReports();renderSettings();renderTodayPriority();updateProjectNames();
+    renderPriority();renderProgress();renderProjects();renderProjectDetail();renderReports();renderSettings();renderTodayPriority();updateProjectNames();
   }
   function download(filename,content,type){
     const blob=new Blob([content],{type:type||'application/octet-stream'});
@@ -203,8 +256,10 @@
   function validDate(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(new Date(s+'T12:00:00').getTime());}
   function importJSON(file){
     if(!file||file.size>2000000){alert('2MB以下のJSONファイルを選択してください。');return;}
+    const importingProject=activeProjectId;
     const reader=new FileReader();
     reader.onload=()=>{
+      if(importingProject!==activeProjectId)return;
       try{
         const data=JSON.parse(String(reader.result));if(!Array.isArray(data.tasks)||data.tasks.length>1000)throw Error('工程データの形式が異なります。');
         const safe=data.tasks.map((t,i)=>{
@@ -217,7 +272,7 @@
         tasks=safe;project=Object.assign({name:'総合工程表',site:'',owner:'',memo:''},data.project&&typeof data.project==='object'?Object.fromEntries(['name','site','owner','memo'].map(k=>[k,String(data.project[k]||'').slice(0,2000)])):{});
         if(!project.name.trim())project.name='総合工程表';
         ranks=Array.isArray(data.ranks)?data.ranks.filter(x=>ids.has(x)):[];
-        localStorage.setItem(projectKey,JSON.stringify(project));localStorage.setItem(rankKey,JSON.stringify(ranks));
+        localStorage.setItem(projectStorageKey(projectKey),JSON.stringify(project));localStorage.setItem(projectStorageKey(rankKey),JSON.stringify(ranks));
         persist();go('today');
       }catch(err){alert('読み込みできませんでした: '+err.message);}
     };
@@ -230,7 +285,7 @@
     [source[index],source[other]]=[source[other],source[index]];
     ranks=source.concat(tasks.map(t=>t.id).filter(k=>!source.includes(k)));
     orderMode='manual';
-    localStorage.setItem('building-schedule-order-mode',orderMode);localStorage.setItem(rankKey,JSON.stringify(ranks));renderPages();
+    localStorage.setItem(projectStorageKey(orderKey),orderMode);localStorage.setItem(projectStorageKey(rankKey),JSON.stringify(ranks));renderPages();
   }
   function quickProgress(t){
     if(!t)return;t.progress=Math.min(100,nProgress(t)+25);
@@ -238,6 +293,12 @@
   }
   function handleAction(action){
     if(['today','gantt','network','priority','projects','progress','reports','settings'].includes(action))return go(action);
+    if(action==='new-project'){
+      $('#newProjectForm').reset();
+      $('#projectError').textContent='';
+      $('#newProjectDialog').showModal();
+      return;
+    }
     if(action==='quick'){ $('#quickUpdateFab')?.click();return; }
     if(action==='print'){window.print();return;}
     if(action==='csv'){exportCSV();return;}
@@ -246,30 +307,41 @@
     if(action==='reset'&&confirm('この端末の工程をサンプルに戻しますか？ 現在の編集内容は失われます。')){$('#reset')?.click();}
   }
   function bindEvents(){
+    tabButtons.forEach(button=>button.addEventListener('click',()=>go(button.dataset.view)));
+    $('#newProjectForm').addEventListener('submit',createProject);
+    $('#closeProjectDialog').addEventListener('click',()=>$('#newProjectDialog').close());
     $('#mainContent').addEventListener('click',(e)=>{
+      const card=e.target.closest('[data-project-open],[data-project-edit]');
+      if(card){
+        openProject(card.dataset.projectOpen||card.dataset.projectEdit,card.dataset.projectOpen?'today':'projectDetail');
+        $('.bottom-nav [aria-current="page"]').focus();
+        return;
+      }
+      const shortcut=e.target.closest('[data-go]');
+      if(shortcut){go(shortcut.dataset.go);return;}
       const a=e.target.closest('[data-ws-action]');if(a){handleAction(a.dataset.wsAction);return;}
       const open=e.target.closest('[data-ws-open]');if(open){openInspector(open.dataset.wsOpen);return;}
       const up=e.target.closest('[data-move-up]');if(up){changeRank(up.dataset.moveUp,-1);return;}
       const down=e.target.closest('[data-move-down]');if(down){changeRank(down.dataset.moveDown,1);return;}
       const progress=e.target.closest('[data-progress-step]');if(progress){quickProgress(tasks.find(t=>t.id===progress.dataset.progressStep));return;}
-      const order=e.target.closest('[data-order-mode]');if(order){orderMode=order.dataset.orderMode;localStorage.setItem('building-schedule-order-mode',orderMode);renderPages();return;}
+      const order=e.target.closest('[data-order-mode]');if(order){orderMode=order.dataset.orderMode;localStorage.setItem(projectStorageKey(orderKey),orderMode);renderPages();return;}
       const report=e.target.closest('[data-report-type]');if(report){reportType=report.dataset.reportType;renderReports();}
     });
     $('#mainContent').addEventListener('change',e=>{
       const t=e.target;
-      if(t.matches('[data-priority]')){const task=tasks.find(x=>x.id===t.dataset.priority);if(task){task.priority=Number(t.value);orderMode='auto';localStorage.setItem('building-schedule-order-mode',orderMode);persist();}}
-      if(t.matches('[data-project-field]')){project[t.dataset.projectField]=t.value.trim();if(!project.name)project.name='総合工程表';localStorage.setItem(projectKey,JSON.stringify(project));renderPages();}
+      if(t.matches('[data-priority]')){const task=tasks.find(x=>x.id===t.dataset.priority);if(task){task.priority=Number(t.value);orderMode='auto';localStorage.setItem(projectStorageKey(orderKey),orderMode);persist();}}
+      if(t.matches('[data-project-field]')){project[t.dataset.projectField]=t.value.trim();if(!project.name)project.name='総合工程表';localStorage.setItem(projectStorageKey(projectKey),JSON.stringify(project));t.value=project[t.dataset.projectField];renderProjects();renderReports();updateProjectNames();}
       if(t.id==='showDone'){includeDone=t.checked;renderPriority();}
       if(t.id==='wsImport'){importJSON(t.files[0]);}
     });
     document.addEventListener('keydown',e=>{
       const tag=(document.activeElement?.tagName||'').toLowerCase();
-      if(e.key.toLowerCase()==='n'&&!['input','textarea','select'].includes(tag)&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();go('gantt');$('#addRow')?.click();}
+      if(e.key.toLowerCase()==='n'&&!$('dialog[open]')&&!['input','textarea','select'].includes(tag)&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();go('gantt');$('#addRow')?.click();}
     });
   }
-  initialiseNavigation();bindEvents();
+  bindEvents();
   const oldRender=render;
   render=()=>{oldRender();renderPages();};
   renderPages();
-  go('today');
+  go('projects');
 })();
